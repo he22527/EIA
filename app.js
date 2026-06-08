@@ -1,0 +1,727 @@
+// ==========================================================================
+// WEATHER DATA & API FETCH
+// ==========================================================================
+const WEATHER_CODES = {
+  0: ['☀️', '晴朗'],
+  1: ['🌤️', '大致晴朗'],
+  2: ['⛅', '局部多雲'],
+  3: ['☁️', '陰天'],
+  45: ['🌫️', '有霧'],
+  48: ['🌫️', '霧凇'],
+  51: ['🌦️', '毛毛雨'],
+  53: ['🌦️', '毛毛雨'],
+  55: ['🌧️', '毛毛雨'],
+  61: ['🌧️', '小雨'],
+  63: ['🌧️', '中雨'],
+  65: ['🌧️', '大雨'],
+  71: ['❄️', '小雪'],
+  73: ['❄️', '中雪'],
+  75: ['❄️', '大雪'],
+  80: ['🌦️', '局部陣雨'],
+  81: ['🌦️', '陣雨'],
+  82: ['⛈️', '大陣雨'],
+  85: ['🌨️', '陣雪'],
+  86: ['🌨️', '陣雪'],
+  95: ['⛈️', '雷陣雨'],
+  96: ['⛈️', '雷雨伴有冰雹'],
+  99: ['⛈️', '強雷雨']
+};
+
+async function loadWeather() {
+  const emojiEl = document.getElementById('w-emoji');
+  const tempEl = document.getElementById('w-temp');
+  const feelEl = document.getElementById('w-feel');
+  const descEl = document.getElementById('w-desc');
+  const humidityEl = document.getElementById('w-humidity');
+  const windEl = document.getElementById('w-wind');
+  const timeEl = document.getElementById('w-time');
+
+  try {
+    const response = await fetch(
+      'https://api.open-meteo.com/v1/forecast?latitude=25.136&longitude=121.501&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,relative_humidity_2m&timezone=Asia%2FTaipei'
+    );
+    if (!response.ok) throw new Error('Weather API request failed');
+    const data = await response.json();
+    const current = data.current;
+
+    const [emoji, desc] = WEATHER_CODES[current.weather_code] || ['🌡️', '未知天氣'];
+
+    emojiEl.textContent = emoji;
+    tempEl.textContent = `${Math.round(current.temperature_2m)}°C`;
+    feelEl.textContent = `體感 ${Math.round(current.apparent_temperature)}°C`;
+    descEl.textContent = desc;
+    humidityEl.textContent = `${current.relative_humidity_2m}%`;
+    windEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
+    
+    const now = new Date();
+    timeEl.textContent = `更新時間：${now.toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' })}`;
+  } catch (error) {
+    console.error('Failed to fetch weather data:', error);
+    emojiEl.textContent = '⚠️';
+    tempEl.textContent = '--°C';
+    descEl.textContent = '無法取得即時天氣';
+    feelEl.textContent = '';
+  }
+}
+
+// ==========================================================================
+// BIBLE VERSE LIST & RANDOMIZER
+// ==========================================================================
+const BIBLE_VERSES = [
+  ['約hn福音 3:16', '神愛世人，甚至將他的獨生子賜給他們，叫一切信他的，不至滅亡，反得永生。'],
+  ['腓立比書 4:13', '我靠著那加給我力量的，凡事都能做。'],
+  ['詩篇 23:1', '耶和華是我的牧者，我必不至缺乏。'],
+  ['以賽亞書 40:31', '但那等候耶和華的，必重新得力；他們必如鷹展翅上騰，他們奔跑卻不困倦，行走卻不疲乏。'],
+  ['耶利米書 29:11', '耶和華說：我知道我向你們所懷的意念，是賜平安的意念，不是降災禍的意念，要叫你們末後有指望。'],
+  ['羅馬書 8:28', '我們曉得萬事都互相效力，叫愛神的人得益處，就是按他旨意被召的人。'],
+  ['哥林多前書 13:4-5', '愛是恆久忍耐，又有恩慈；愛是不嫉妒，愛是不自誇，不張狂，不求自己的益處，不輕易發怒，不計算人的惡。'],
+  ['馬太福音 11:28', '凡勞苦擔重擔的人，可以到我這裡來，我就使你們得安息。'],
+  ['詩篇 118:24', '這是耶和華所定的日子，我們在其中要高興歡喜。'],
+  ['約hn福音 15:13', '人為朋友捨命，人的愛心沒有比這個大的。'],
+  ['箴言 3:5-6', '你要專心仰賴耶和華，不可倚靠自己的聰明，在你一切所行的事上，都要認定他，他必指引你的路。'],
+  ['馬太福音 5:9', '使人和睦的人有福了！因為他們必稱為神的兒子。'],
+  ['詩篇 121:1-2', '我要向山舉目；我的幫助從何而來？我的幫助從造天地的耶和華而來。'],
+  ['帖撒羅尼迦前書 5:16-18', '要常常喜樂，不住地禱告，凡事謝恩；因為這是神在基督耶穌裡向你們所定的旨意。']
+];
+
+let lastVerseIndex = -1;
+
+function loadBibleVerse() {
+  let index;
+  do {
+    index = Math.floor(Math.random() * BIBLE_VERSES.length);
+  } while (index === lastVerseIndex && BIBLE_VERSES.length > 1);
+  
+  lastVerseIndex = index;
+  const [ref, text] = BIBLE_VERSES[index];
+  
+  const textEl = document.getElementById('bible-text');
+  const refEl = document.getElementById('bible-ref');
+  
+  textEl.style.opacity = 0;
+  refEl.style.opacity = 0;
+  
+  setTimeout(() => {
+    textEl.textContent = `“ ${text} ”`;
+    refEl.textContent = `— ${ref}`;
+    textEl.style.opacity = 1;
+    refEl.style.opacity = 1;
+  }, 200);
+}
+
+// ==========================================================================
+// ACTIVE TAB SELECTION LOGIC
+// ==========================================================================
+function setActiveTab(tabId) {
+  // Hide all tab content
+  document.querySelectorAll('.tab-content').forEach(el => {
+    el.classList.remove('active');
+  });
+  
+  // Deactivate all tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Show target tab content
+  const activeContent = document.getElementById(`tab-${tabId}`);
+  if (activeContent) {
+    activeContent.classList.add('active');
+  }
+  
+  // Activate target tab button
+  const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    
+    // Smoothly scroll active button to the center of tab list (for mobile)
+    const container = document.getElementById('tab-nav');
+    const btnLeft = activeBtn.offsetLeft;
+    const btnWidth = activeBtn.offsetWidth;
+    const containerWidth = container.offsetWidth;
+    container.scrollTo({
+      left: btnLeft - (containerWidth / 2) + (btnWidth / 2),
+      behavior: 'smooth'
+    });
+  }
+  
+  // Smooth scroll back to top of the content area
+  if (window.innerWidth <= 768) {
+    const contentArea = document.querySelector('.content-area');
+    window.scrollTo({
+      top: contentArea.offsetTop - 80,
+      behavior: 'smooth'
+    });
+  }
+}
+
+// Bind tab click events
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    setActiveTab(btn.dataset.tab);
+  });
+});
+
+// ==========================================================================
+// DARK / LIGHT THEME TOGGLE
+// ==========================================================================
+const themeToggleBtn = document.getElementById('theme-toggle');
+const themeIcon = document.getElementById('theme-icon');
+
+function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+    updateThemeIcon(true);
+  } else {
+    document.body.classList.remove('dark');
+    updateThemeIcon(false);
+  }
+}
+
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  updateThemeIcon(isDark);
+}
+
+function updateThemeIcon(isDark) {
+  if (isDark) {
+    // Sun icon for dark mode (click to switch to light)
+    themeIcon.innerHTML = `
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    `;
+  } else {
+    // Moon icon for light mode (click to switch to dark)
+    themeIcon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+  }
+}
+
+themeToggleBtn.addEventListener('click', toggleTheme);
+
+// ==========================================================================
+// CHATBOT WIDGET LOGIC (LOCAL SMART BOT + GEMINI KEY INTEGRATION)
+// ==========================================================================
+const chatToggleBtn = document.getElementById('chat-toggle');
+const chatCloseBtn = document.getElementById('chat-close');
+const chatPanel = document.getElementById('chat-panel');
+const chatMessages = document.getElementById('chat-messages');
+const chatInput = document.getElementById('chat-input');
+const chatSendBtn = document.getElementById('chat-send');
+const chatToggleIcon = document.getElementById('chat-toggle-icon');
+
+let isChatOpen = false;
+
+function toggleChat() {
+  isChatOpen = !isChatOpen;
+  if (isChatOpen) {
+    chatPanel.classList.add('active');
+    chatToggleIcon.innerHTML = `
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    `;
+    chatInput.focus();
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  } else {
+    chatPanel.classList.remove('active');
+    chatToggleIcon.innerHTML = `
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    `;
+  }
+}
+
+chatToggleBtn.addEventListener('click', toggleChat);
+chatCloseBtn.addEventListener('click', toggleChat);
+
+function appendMessage(sender, text) {
+  const msgRow = document.createElement('div');
+  msgRow.className = `chat-msg-row ${sender}`;
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-msg-bubble';
+  bubble.textContent = text;
+  
+  msgRow.appendChild(bubble);
+  chatMessages.appendChild(msgRow);
+  
+  // Smooth scroll to bottom
+  chatMessages.scrollTo({
+    top: chatMessages.scrollHeight,
+    behavior: 'smooth'
+  });
+}
+
+function showTypingIndicator() {
+  const indicator = document.createElement('div');
+  indicator.id = 'chat-typing-indicator';
+  indicator.className = 'chat-msg-row bot';
+  
+  indicator.innerHTML = `
+    <div class="typing-indicator">
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+      <div class="typing-dot"></div>
+    </div>
+  `;
+  chatMessages.appendChild(indicator);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const indicator = document.getElementById('chat-typing-indicator');
+  if (indicator) indicator.remove();
+}
+
+// Local intelligence QA engine
+const LOCAL_RESPONSES = [
+  {
+    keywords: ['你好', '哈囉', '嗨', 'hello', 'hi', '您好'],
+    response: '您好！我是您的「北投來走走」旅遊小助手。很高興為您服務！今天想了解什麼呢？您可以問我關於：行程時間、中心新村、溫泉博物館、或者銀光食驗室的美味午餐菜單喔！'
+  },
+  {
+    keywords: ['行程', '時間', '時程', '幾點', '出發', '說明', '規劃'],
+    response: '當天（2026/06/28）的漫遊行程規劃如下：\n• 09:45 - 捷運新北投站1號出口集合\n• 10:00 - 行程說明\n• 10:15 - 正式出發探索北投\n• 12:00 - 午餐饗宴（前往奇岩三合街的「銀光食驗室」吃Buffet）\n• 14:40 - 離塵不離城（散步奇岩生態綠洲與磺港溪）\n• 15:10 - 賦歸，平安返家。'
+  },
+  {
+    keywords: ['吃', '午餐', '菜單', '餐點', '銀光', '食驗室', '對味廚房', '料理', 'buffet', '自助餐'],
+    response: '中午我們會在「對味廚房銀光食驗室」享受高品質現做自助吧！主廚特選動物福利與友善土地食材：\n• 🥩主菜：咖喱牛筋膜、牛肝菌燉雞、普羅旺斯燉菜、肉醬千層麵\n• 🌿素食：烏梅蕃茄乳酪沙拉、蕃茄乳酪義大利麵、青醬乳酪羅馬披薩\n• 🍰甜點：手工提拉米蘇、招牌胡蘿蔔蛋糕\n• ☕飲品：熱可可茶、小農豆漿、健康氣泡飲\n現點現做，健康美味！'
+  },
+  {
+    keywords: ['捷運', '怎麼去', '地址', '交通', '地圖', '奇岩站', '導航'],
+    response: '銀光食驗室的地址為：台北市北投區三合街一段119號1樓。\n• 首選路線：從「捷運奇岩站」步行僅需約 5-8 分鐘即可到達。\n• 替代路線：從「捷運新北投站」步行約 10-12 分鐘。您可以切換至「午餐饗宴」頁籤，底部有直接導航的 Google Maps 連結哦！'
+  },
+
+  {
+    keywords: ['中心新村', '眷村', '軍醫'],
+    response: '中心新村是全台灣唯一被保存下來的「溫泉軍醫眷村」！曾是國軍衛戍醫院（現三總北投分院）的眷舍，完整保存了日式木造眷舍、紅磚矮牆與溫泉公共浴室，充滿濃濃時代感與文化底蘊，非常值得參觀！'
+  },
+  {
+    keywords: ['溫泉博物館', '博物館', '古蹟', '榻榻米', '開放'],
+    response: '北投溫泉博物館建於 1913 年，是百年國定古蹟。原為東亞最大的日式公共浴場，內有壯觀的羅馬拱廊浴池、二樓榻榻米涼亭。開放時間為週二至週日 09:00-17:00（週一休館，免費入場），還有一部好看的介紹影片在「溫泉博物館」頁籤下可以收看喔！'
+  },
+  {
+    keywords: ['天氣', '下雨', '氣溫'],
+    response: '您可以在頁面下方的「即時天氣 widget」查看北投最新的即時氣溫、體感溫度與濕度。資料每小時都會更新。如果氣溫高，請多帶水防中暑；若有短暫雨，別忘了帶把傘唷！'
+  },
+  {
+    keywords: ['聖經', '金句', '祝福', '耶和華', '神'],
+    response: '為您隨機挑選一句祝福金句：\n“ 但那等候耶和華的，必重新得力；他們必如鷹展翅上騰，他們奔跑卻不困倦，行走卻不疲乏。— 以賽亞書 40:31 ”\n願主祝福您今天滿有平安與喜樂！'
+  },
+  {
+    keywords: ['離塵不離城', '奇岩里', '重劃區', '生態', '磺港溪'],
+    response: '北投奇岩里是一塊純淨的綠色重劃區，擁有一條整治復育的生態磺港溪。全區高度限制 32 米，大樓建蔽率低且綠覆率極高，推動了溪水復育親水計畫，讓城市人可以在溪畔聽見蟬鳴水聲、觀察水鳥生態，真正做到「離塵不離城」！'
+  }
+];
+
+// Handle Local Matching
+function getLocalAnswer(query) {
+  const lowercaseQuery = query.toLowerCase();
+  
+  // Secret API Key configuration Command: /apikey YOUR_KEY
+  if (lowercaseQuery.startsWith('/apikey ')) {
+    const key = query.substring(8).trim();
+    if (key) {
+      localStorage.setItem('gemini_api_key', key);
+      return '您的 Gemini API Key 設定成功！接下來小助手將切換為 Gemini AI 模式，能進行更聰明且客製化的問答囉！🔑✨ (若要清除金鑰，請輸入 /clearkey)';
+    }
+  }
+  
+  if (lowercaseQuery === '/clearkey') {
+    localStorage.removeItem('gemini_api_key');
+    return '已成功清除您的 API 金鑰。小助手已切換回本地問答模式！';
+  }
+
+  for (const item of LOCAL_RESPONSES) {
+    if (item.keywords.some(keyword => lowercaseQuery.includes(keyword))) {
+      return item.response;
+    }
+  }
+  return '謝謝您的提問！關於這點我還在學習中。不過我可以為您提供今天「北投來走走」的相關資訊：包含漫遊行程規劃、中心新村與溫泉古蹟導覽，以及午餐銀光食驗室的菜單與交通路線喔！您想先了解哪一部分呢？';
+}
+
+// Call Gemini API (if user set their own key via /apikey)
+async function callGeminiAPI(apiKey, query) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const promptContext = `
+    你是「北投來走走」單頁網頁的旅遊小助手。今天活動舉辦日期是 2026 年 6 月 28 日 (星期日)。
+    這個活動主要分為幾個部分：
+    1. 時代眷村情：參觀北投中心新村（全台唯一的溫泉軍醫眷村，文史活化）。
+    2. 溫泉博物館：百年國定古蹟，羅馬浴池與榻榻米。
+    3. 午餐饗宴：銀光食驗室（地址：台北市北投區三合街一段119號1樓。捷運奇岩站走路5-8分。菜單包括：咖喱牛筋膜、牛肝菌燉雞、烏梅蕃茄乳酪沙拉、羅馬披薩、提拉米蘇、胡蘿蔔蛋糕、熱可可茶等）。
+    4. 離塵不離城：奇岩重劃區生態、限高與磺港溪溪流整治。
+    
+    請以親切、專業、溫暖的口吻回答旅客關於此行程的任何問題。
+    問題：${query}
+  `;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: promptContext }]
+          }
+        ],
+        generationConfig: {
+          maxOutputTokens: 500,
+          temperature: 0.7
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Gemini API error details:', errorText);
+      throw new Error('API request failed');
+    }
+
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '抱歉，Gemini 小助手剛才發了一下呆，請再問我一次。';
+  } catch (error) {
+    console.error('Failed to call Gemini API:', error);
+    return '連接 Gemini API 時發生異常，可能您的 API Key 不正確或網路中斷。目前暫時改用本地引擎為您服務。\n\n答覆：' + getLocalAnswer(query);
+  }
+}
+
+async function handleSendMessage() {
+  const query = chatInput.value.trim();
+  if (!query) return;
+
+  // Add User bubble
+  appendMessage('user', query);
+  chatInput.value = '';
+  
+  // Show Typing...
+  showTypingIndicator();
+  
+  // Simulate network latency (500ms - 1000ms) for high-end feeling
+  await new Promise(resolve => setTimeout(resolve, 600));
+
+  const apiKey = localStorage.getItem('gemini_api_key');
+  let responseText = '';
+
+  if (apiKey) {
+    responseText = await callGeminiAPI(apiKey, query);
+  } else {
+    responseText = getLocalAnswer(query);
+  }
+
+  // Remove typing indicator and append bot message
+  removeTypingIndicator();
+  appendMessage('bot', responseText);
+}
+
+// Bind Chat Send Buttons
+chatSendBtn.addEventListener('click', handleSendMessage);
+chatInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    handleSendMessage();
+  }
+});
+
+// ==========================================================================
+// REGISTRATION FORM & FIREBASE INTEGRATION LOGIC
+// ==========================================================================
+const regModal = document.getElementById('register-modal');
+const heroRegBtn = document.getElementById('hero-register-btn');
+const modalCloseBtn = document.getElementById('modal-close');
+const regForm = document.getElementById('register-form');
+const regStatus = document.getElementById('reg-status');
+
+// Config Fields
+const fbApiKeyInput = document.getElementById('fb-apikey');
+const fbProjectIdInput = document.getElementById('fb-projectid');
+const fbAppIdInput = document.getElementById('fb-appid');
+const configFieldsContainer = document.getElementById('firebase-config-fields');
+const configArrow = document.getElementById('config-arrow');
+
+let firestoreDB = null;
+let isFirebaseConnected = false;
+
+// Open/Close Modal
+if (heroRegBtn) {
+  heroRegBtn.addEventListener('click', () => {
+    regModal.classList.add('active');
+    // Pre-fill config values if stored
+    fbApiKeyInput.value = localStorage.getItem('fb_apikey') || '';
+    fbProjectIdInput.value = localStorage.getItem('fb_projectid') || '';
+    fbAppIdInput.value = localStorage.getItem('fb_appid') || '';
+    
+    const web3KeyInput = document.getElementById('web3forms-key');
+    if (web3KeyInput) {
+      web3KeyInput.value = localStorage.getItem('web3forms_key') || '';
+    }
+    
+    // Clear status
+    regStatus.style.display = 'none';
+    regStatus.className = 'reg-status-box';
+  });
+}
+
+if (modalCloseBtn) {
+  modalCloseBtn.addEventListener('click', () => {
+    regModal.classList.remove('active');
+  });
+}
+
+// Close modal on clicking overlay
+regModal.addEventListener('click', (e) => {
+  if (e.target === regModal) {
+    regModal.classList.remove('active');
+  }
+});
+
+// Toggle Firebase configuration fields panel
+function toggleConfigSection() {
+  const isHidden = configFieldsContainer.style.display === 'none';
+  if (isHidden) {
+    configFieldsContainer.style.display = 'block';
+    configArrow.classList.add('open');
+  } else {
+    configFieldsContainer.style.display = 'none';
+    configArrow.classList.remove('open');
+  }
+}
+
+// Toggle Email configuration fields panel
+function toggleEmailConfigSection() {
+  const fields = document.getElementById('email-config-fields');
+  const arrow = document.getElementById('email-config-arrow');
+  if (fields && arrow) {
+    const isHidden = fields.style.display === 'none';
+    if (isHidden) {
+      fields.style.display = 'block';
+      arrow.classList.add('open');
+    } else {
+      fields.style.display = 'none';
+      arrow.classList.remove('open');
+    }
+  }
+}
+
+// Save Firebase config values to localStorage
+function saveFirebaseConfig() {
+  const key = fbApiKeyInput.value.trim();
+  const project = fbProjectIdInput.value.trim();
+  const app = fbAppIdInput.value.trim();
+
+  if (!key || !project || !app) {
+    showRegStatus('error', '⚠️ 請完整填寫 Firebase 設定項目！');
+    return;
+  }
+
+  localStorage.setItem('fb_apikey', key);
+  localStorage.setItem('fb_projectid', project);
+  localStorage.setItem('fb_appid', app);
+
+  showRegStatus('success', '🔑 Firebase 設定已儲存！正在重新初始化...');
+  setTimeout(() => {
+    location.reload();
+  }, 1000);
+}
+
+// Clear Firebase config
+function clearFirebaseConfig() {
+  localStorage.removeItem('fb_apikey');
+  localStorage.removeItem('fb_projectid');
+  localStorage.removeItem('fb_appid');
+  
+  fbApiKeyInput.value = '';
+  fbProjectIdInput.value = '';
+  fbAppIdInput.value = '';
+
+  showRegStatus('info', '🗑️ 已清除 Firebase 設定，回復為本機預覽模式。');
+  setTimeout(() => {
+    location.reload();
+  }, 1000);
+}
+
+// Save Email config values to localStorage
+function saveEmailConfig() {
+  const keyInput = document.getElementById('web3forms-key');
+  const key = keyInput ? keyInput.value.trim() : '';
+
+  if (!key) {
+    showRegStatus('error', '⚠️ 請輸入 Web3Forms Access Key！');
+    return;
+  }
+
+  localStorage.setItem('web3forms_key', key);
+  showRegStatus('success', '📧 Email 通知設定已儲存！');
+
+  setTimeout(() => {
+    const fields = document.getElementById('email-config-fields');
+    const arrow = document.getElementById('email-config-arrow');
+    if (fields && arrow) {
+      fields.style.display = 'none';
+      arrow.classList.remove('open');
+    }
+  }, 1000);
+}
+
+// Clear Email config
+function clearEmailConfig() {
+  localStorage.removeItem('web3forms_key');
+  const keyInput = document.getElementById('web3forms-key');
+  if (keyInput) keyInput.value = '';
+
+  showRegStatus('info', '🗑️ 已清除 Email 通知設定。');
+}
+
+// Initialize Firebase SDK
+function initFirebase() {
+  const apiKey = localStorage.getItem('fb_apikey');
+  const projectId = localStorage.getItem('fb_projectid');
+  const appId = localStorage.getItem('fb_appid');
+
+  if (apiKey && projectId && appId) {
+    try {
+      if (typeof firebase !== 'undefined') {
+        if (firebase.apps.length === 0) {
+          firebase.initializeApp({
+            apiKey: apiKey,
+            authDomain: `${projectId}.firebaseapp.com`,
+            projectId: projectId,
+            storageBucket: `${projectId}.appspot.com`,
+            appId: appId
+          });
+        }
+        firestoreDB = firebase.firestore();
+        isFirebaseConnected = true;
+        console.log("Firebase Firestore successfully initialized!");
+        return true;
+      }
+    } catch (error) {
+      console.error("Error initializing Firebase Web SDK:", error);
+    }
+  }
+  return false;
+}
+
+function showRegStatus(type, message) {
+  regStatus.textContent = message;
+  regStatus.className = `reg-status-box ${type}`;
+  regStatus.style.display = 'block';
+}
+
+// Handle Form Submission
+async function handleRegisterSubmit() {
+  const name = document.getElementById('reg-name').value.trim();
+  const count = parseInt(document.getElementById('reg-count').value);
+
+  if (!name || isNaN(count) || count < 1) {
+    showRegStatus('error', '❌ 請輸入有效的姓名與人數！');
+    return;
+  }
+
+  showRegStatus('info', '⏳ 正在提交報名資料，請稍候...');
+  const submitBtn = document.getElementById('reg-submit');
+  submitBtn.disabled = true;
+
+  let dbSuccess = false;
+  let dbMsg = '';
+
+  if (isFirebaseConnected && firestoreDB) {
+    // Write to Firestore database
+    try {
+      await firestoreDB.collection("registrations").add({
+        name: name,
+        count: count,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      dbSuccess = true;
+      dbMsg = '已上傳至雲端 Firebase';
+    } catch (error) {
+      console.error("Firestore submit error:", error);
+      saveToLocalFallback(name, count);
+      dbSuccess = false;
+      dbMsg = `雲端儲存失敗 (${error.message})，已備份至瀏覽器`;
+    }
+  } else {
+    // Local fallback when Firebase config is missing
+    const savedLocal = saveToLocalFallback(name, count);
+    dbSuccess = savedLocal;
+    dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
+  }
+
+  // Handle email notification via Web3Forms
+  const web3Key = localStorage.getItem('web3forms_key');
+  let emailMsg = '';
+  if (web3Key && dbSuccess) {
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: web3Key,
+          subject: `【北投來走走】新報名通知：${name}`,
+          from_name: '北投來走走報名系統',
+          name: name,
+          count: count,
+          to_email: 'taiwan.kwei@ceci.com.tw',
+          message: `您好，收到新的活動報名：\n\n姓名：${name}\n人數：${count} 人\n報名時間：${new Date().toLocaleString('zh-TW')}\n\n這是一封來自您的網站「北投來走走」的自動報名通知。`
+        })
+      });
+      if (response.ok) {
+        emailMsg = '，且已成功發送通知信至 taiwan.kwei@ceci.com.tw';
+      } else {
+        emailMsg = '，但 Email 通知發送失敗（請確認 Web3Forms Key 是否有效）';
+      }
+    } catch (e) {
+      console.error("Email send error:", e);
+      emailMsg = '，但 Email 通知發送時發生錯誤';
+    }
+  } else if (!web3Key) {
+    emailMsg = '（未設定 Email 通知，您可以點擊下方 Email 設定來啟用自動信件通知）';
+  }
+
+  if (dbSuccess) {
+    showRegStatus('success', `🎉 報名成功！${dbMsg}${emailMsg}。歡迎您，${name} (共 ${count} 人)！`);
+    regForm.reset();
+  } else {
+    showRegStatus('error', `❌ 報名失敗：${dbMsg}。`);
+  }
+  submitBtn.disabled = false;
+}
+
+// Fallback logic to save registration data in localStorage (without status print)
+function saveToLocalFallback(name, count) {
+  try {
+    const localData = JSON.parse(localStorage.getItem('beitou_registrations') || '[]');
+    localData.push({
+      name: name,
+      count: count,
+      timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('beitou_registrations', JSON.stringify(localData));
+    return true;
+  } catch (e) {
+    console.error("Failed to write to localStorage:", e);
+    return false;
+  }
+}
+
+// ==========================================================================
+// PAGE INITIALIZATION
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  initTheme();
+  loadWeather();
+  loadBibleVerse();
+  initFirebase(); // Try initializing Firebase
+});
