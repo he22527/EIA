@@ -456,7 +456,7 @@ if (heroRegBtn) {
     regModal.classList.add('active');
     // Pre-fill config values if stored
     fbApiKeyInput.value = localStorage.getItem('fb_apikey') || '';
-    fbProjectIdInput.value = localStorage.getItem('fb_projectid') || '';
+    fbProjectIdInput.value = localStorage.getItem('fb_projectid') || 'mydesignProject';
     fbAppIdInput.value = localStorage.getItem('fb_appid') || '';
     
     const gasUrlInput = document.getElementById('gas-url');
@@ -636,7 +636,7 @@ async function handleRegisterSubmit() {
   if (isFirebaseConnected && firestoreDB) {
     // Write to Firestore database
     try {
-      await firestoreDB.collection("registrations").add({
+      await firestoreDB.collection("beitou_registrations").add({
         name: name,
         count: count,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
