@@ -459,6 +459,11 @@ if (heroRegBtn) {
     fbProjectIdInput.value = localStorage.getItem('fb_projectid') || '';
     fbAppIdInput.value = localStorage.getItem('fb_appid') || '';
     
+    const gasUrlInput = document.getElementById('gas-url');
+    if (gasUrlInput) {
+      gasUrlInput.value = localStorage.getItem('gas_url') || '';
+    }
+    
     // Clear status
     regStatus.style.display = 'none';
     regStatus.className = 'reg-status-box';
@@ -543,6 +548,38 @@ function clearFirebaseConfig() {
   }, 1000);
 }
 
+// Save Email config values to localStorage
+function saveEmailConfig() {
+  const urlInput = document.getElementById('gas-url');
+  const url = urlInput ? urlInput.value.trim() : '';
+
+  if (!url) {
+    showRegStatus('error', '⚠️ 請輸入 Google Apps Script 網址！');
+    return;
+  }
+
+  localStorage.setItem('gas_url', url);
+  showRegStatus('success', '📧 Email 通知設定已儲存！');
+
+  setTimeout(() => {
+    const fields = document.getElementById('email-config-fields');
+    const arrow = document.getElementById('email-config-arrow');
+    if (fields && arrow) {
+      fields.style.display = 'none';
+      arrow.classList.remove('open');
+    }
+  }, 1000);
+}
+
+// Clear Email config
+function clearEmailConfig() {
+  localStorage.removeItem('gas_url');
+  const urlInput = document.getElementById('gas-url');
+  if (urlInput) urlInput.value = '';
+
+  showRegStatus('info', '🗑️ 已清除 Email 通知設定。');
+}
+
 // Initialize Firebase SDK
 function initFirebase() {
   const apiKey = localStorage.getItem('fb_apikey');
@@ -619,33 +656,56 @@ async function handleRegisterSubmit() {
     dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
   }
 
-  // Handle email notification via FormSubmit.co
+  // Handle email notification
   let emailMsg = '';
   if (dbSuccess) {
-    try {
-      const response = await fetch('https://formsubmit.co/ajax/taiwan.kwei@ceci.com.tw', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: `【北投來走走】新報名通知：${name}`,
-          _cc: 'g0306@ceci.com.tw,taiwan.kwei@gmail.com',
-          "姓名": name,
-          "參加人數": `${count} 人`,
-          "報名時間": new Date().toLocaleString('zh-TW'),
-          _template: 'box'
-        })
-      });
-      if (response.ok) {
-        emailMsg = '，且已成功發送通知信至指定信箱';
-      } else {
-        emailMsg = '，但 Email 通知發送失敗（請確認主信箱是否已啟用 FormSubmit）';
+    const gasUrl = localStorage.getItem('gas_url');
+    if (gasUrl) {
+      // Send via Google Apps Script (No verification required, sends immediately)
+      try {
+        await fetch(gasUrl, {
+          method: 'POST',
+          mode: 'no-cors', // Avoid CORS issues
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            name: name,
+            count: count
+          })
+        });
+        emailMsg = '，且已成功發送通知信 (透過 Google Apps Script)';
+      } catch (e) {
+        console.error("GAS Email send error:", e);
+        emailMsg = '，但 Google Apps Script 發送失敗';
       }
-    } catch (e) {
-      console.error("Email send error:", e);
-      emailMsg = '，但 Email 通知發送時發生錯誤';
+    } else {
+      // Fallback to FormSubmit.co (Requires one-time verification click)
+      try {
+        const response = await fetch('https://formsubmit.co/ajax/taiwan.kwei@ceci.com.tw', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            _subject: `【北投來走走】新報名通知：${name}`,
+            _cc: 'g0306@ceci.com.tw,taiwan.kwei@gmail.com',
+            "姓名": name,
+            "參加人數": `${count} 人`,
+            "報名時間": new Date().toLocaleString('zh-TW'),
+            _template: 'box'
+          })
+        });
+        if (response.ok) {
+          emailMsg = '，且已發送通知信 (請確認主信箱是否已點擊 FormSubmit 驗證連結)';
+        } else {
+          emailMsg = '，但 Email 通知發送失敗';
+        }
+      } catch (e) {
+        console.error("FormSubmit send error:", e);
+        emailMsg = '，但 Email 通知發送時發生錯誤';
+      }
     }
   }
 

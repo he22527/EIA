@@ -798,18 +798,32 @@
         <!-- Email Notification Settings (Collapsible) -->
         <div class="firebase-config-section" style="margin-top: 16px;">
           <button type="button" class="config-toggle-btn" onclick="toggleEmailConfigSection()">
-            <span>📧 Email 通知狀態 (自動啟用)</span>
+            <span>📧 Email 通知設定 (自動發送)</span>
             <svg id="email-config-arrow" class="config-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div id="email-config-fields" class="config-fields-container" style="display: none;">
-            <p class="config-help">報名成功時，系統將自動即時發送 Email 通知信至以下信箱：</p>
-            <div style="font-size: 0.75rem; line-height: 1.6; margin-bottom: 12px; color: var(--text-primary); font-family: var(--font-sans);">
-              • <strong>主收件人：</strong>taiwan.kwei@ceci.com.tw<br>
-              • <strong>副本抄送：</strong>g0306@ceci.com.tw, taiwan.kwei@gmail.com
+            <p class="config-help">報名成功時，系統將自動即時發送通知至：</p>
+            <div style="font-size: 0.72rem; line-height: 1.5; margin-bottom: 12px; color: var(--text-primary); font-family: var(--font-sans);">
+              • taiwan.kwei@ceci.com.tw (主收件)<br>
+              • g0306@ceci.com.tw, taiwan.kwei@gmail.com (CC)
             </div>
-            <p class="config-help" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
-              💡 <strong>首次啟用說明：</strong><br>
-              第一次提交報名表後，FormSubmit 服務會發送一封「啟動驗證信」至您的信箱 <strong>taiwan.kwei@ceci.com.tw</strong>。請前往該信箱收信並點擊驗證連結，之後的所有報名便會自動寄出通知信！
+            
+            <div class="form-group-sm" style="border-top: 1px dashed var(--border-color); padding-top: 10px;">
+              <label for="gas-url"><strong>方法一：Google Apps Script (推薦，免驗證信)</strong></label>
+              <input type="text" id="gas-url" placeholder="請貼上部署後取得的 Web App URL" />
+              <p class="config-help" style="margin-top: 4px; font-size: 0.62rem;">
+                💡 使用專案目錄下的 <code>GoogleAppsScript.js</code> 部署為 Google 網頁應用程式，即可即時發送，不需驗證信。
+              </p>
+            </div>
+            
+            <div style="margin-top: 10px; display: flex; gap: 8px;">
+              <button type="button" class="btn-sm" onclick="saveEmailConfig()">儲存 Email 設定</button>
+              <button type="button" class="btn-sm btn-clear" onclick="clearEmailConfig()">清除設定</button>
+            </div>
+
+            <p class="config-help" style="border-top: 1px solid var(--border-color); padding-top: 8px; margin-top: 12px;">
+              ⚠️ <strong>方法二：預設 FormSubmit (免設定，首次需點驗證信)</strong><br>
+              若不設定 Google 網址，系統預設使用 FormSubmit。但<strong>首次</strong>提交後，主收件人必須去信箱點擊一次啟動連結，後續才能收到報名通知信。
             </p>
           </div>
         </div>
