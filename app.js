@@ -459,11 +459,6 @@ if (heroRegBtn) {
     fbProjectIdInput.value = localStorage.getItem('fb_projectid') || '';
     fbAppIdInput.value = localStorage.getItem('fb_appid') || '';
     
-    const web3KeyInput = document.getElementById('web3forms-key');
-    if (web3KeyInput) {
-      web3KeyInput.value = localStorage.getItem('web3forms_key') || '';
-    }
-    
     // Clear status
     regStatus.style.display = 'none';
     regStatus.className = 'reg-status-box';
@@ -548,38 +543,6 @@ function clearFirebaseConfig() {
   }, 1000);
 }
 
-// Save Email config values to localStorage
-function saveEmailConfig() {
-  const keyInput = document.getElementById('web3forms-key');
-  const key = keyInput ? keyInput.value.trim() : '';
-
-  if (!key) {
-    showRegStatus('error', '⚠️ 請輸入 Web3Forms Access Key！');
-    return;
-  }
-
-  localStorage.setItem('web3forms_key', key);
-  showRegStatus('success', '📧 Email 通知設定已儲存！');
-
-  setTimeout(() => {
-    const fields = document.getElementById('email-config-fields');
-    const arrow = document.getElementById('email-config-arrow');
-    if (fields && arrow) {
-      fields.style.display = 'none';
-      arrow.classList.remove('open');
-    }
-  }, 1000);
-}
-
-// Clear Email config
-function clearEmailConfig() {
-  localStorage.removeItem('web3forms_key');
-  const keyInput = document.getElementById('web3forms-key');
-  if (keyInput) keyInput.value = '';
-
-  showRegStatus('info', '🗑️ 已清除 Email 通知設定。');
-}
-
 // Initialize Firebase SDK
 function initFirebase() {
   const apiKey = localStorage.getItem('fb_apikey');
@@ -656,38 +619,34 @@ async function handleRegisterSubmit() {
     dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
   }
 
-  // Handle email notification via Web3Forms
-  const web3Key = localStorage.getItem('web3forms_key');
+  // Handle email notification via FormSubmit.co
   let emailMsg = '';
-  if (web3Key && dbSuccess) {
+  if (dbSuccess) {
     try {
-      const response = await fetch('https://api.web3forms.com/submit', {
+      const response = await fetch('https://formsubmit.co/ajax/taiwan.kwei@ceci.com.tw', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          access_key: web3Key,
-          subject: `【北投來走走】新報名通知：${name}`,
-          from_name: '北投來走走報名系統',
-          name: name,
-          count: count,
-          to_email: 'taiwan.kwei@ceci.com.tw',
-          message: `您好，收到新的活動報名：\n\n姓名：${name}\n人數：${count} 人\n報名時間：${new Date().toLocaleString('zh-TW')}\n\n這是一封來自您的網站「北投來走走」的自動報名通知。`
+          _subject: `【北投來走走】新報名通知：${name}`,
+          _cc: 'g0306@ceci.com.tw,taiwan.kwei@gmail.com',
+          "姓名": name,
+          "參加人數": `${count} 人`,
+          "報名時間": new Date().toLocaleString('zh-TW'),
+          _template: 'box'
         })
       });
       if (response.ok) {
-        emailMsg = '，且已成功發送通知信至 taiwan.kwei@ceci.com.tw';
+        emailMsg = '，且已成功發送通知信至指定信箱';
       } else {
-        emailMsg = '，但 Email 通知發送失敗（請確認 Web3Forms Key 是否有效）';
+        emailMsg = '，但 Email 通知發送失敗（請確認主信箱是否已啟用 FormSubmit）';
       }
     } catch (e) {
       console.error("Email send error:", e);
       emailMsg = '，但 Email 通知發送時發生錯誤';
     }
-  } else if (!web3Key) {
-    emailMsg = '（未設定 Email 通知，您可以點擊下方 Email 設定來啟用自動信件通知）';
   }
 
   if (dbSuccess) {

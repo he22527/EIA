@@ -795,24 +795,22 @@
           </div>
         </div>
 
-        <!-- Email Notification Settings (Optional/Collapsible) -->
+        <!-- Email Notification Settings (Collapsible) -->
         <div class="firebase-config-section" style="margin-top: 16px;">
           <button type="button" class="config-toggle-btn" onclick="toggleEmailConfigSection()">
-            <span>📧 Email 通知設定</span>
+            <span>📧 Email 通知狀態 (自動啟用)</span>
             <svg id="email-config-arrow" class="config-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div id="email-config-fields" class="config-fields-container" style="display: none;">
-            <p class="config-help">啟用報名成功時發送 Email 通知。請輸入您在 Web3Forms 申請的 Access Key：</p>
-            <div class="form-group-sm">
-              <label for="email-to">通知對象 (Email)</label>
-              <input type="email" id="email-to" value="taiwan.kwei@ceci.com.tw" disabled style="background-color: var(--bg-primary); cursor: not-allowed;" />
+            <p class="config-help">報名成功時，系統將自動即時發送 Email 通知信至以下信箱：</p>
+            <div style="font-size: 0.75rem; line-height: 1.6; margin-bottom: 12px; color: var(--text-primary); font-family: var(--font-sans);">
+              • <strong>主收件人：</strong>taiwan.kwei@ceci.com.tw<br>
+              • <strong>副本抄送：</strong>g0306@ceci.com.tw, taiwan.kwei@gmail.com
             </div>
-            <div class="form-group-sm">
-              <label for="web3forms-key">Web3Forms Access Key</label>
-              <input type="text" id="web3forms-key" placeholder="例如：1a2b3c4d-..." />
-            </div>
-            <button type="button" class="btn-sm" onclick="saveEmailConfig()">儲存 Email 設定</button>
-            <button type="button" class="btn-sm btn-clear" onclick="clearEmailConfig()">清除設定</button>
+            <p class="config-help" style="border-top: 1px solid var(--border-color); padding-top: 8px;">
+              💡 <strong>首次啟用說明：</strong><br>
+              第一次提交報名表後，FormSubmit 服務會發送一封「啟動驗證信」至您的信箱 <strong>taiwan.kwei@ceci.com.tw</strong>。請前往該信箱收信並點擊驗證連結，之後的所有報名便會自動寄出通知信！
+            </p>
           </div>
         </div>
       </form>
