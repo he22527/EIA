@@ -460,7 +460,7 @@ if (heroRegBtn) {
     
     // Pre-fill config values if stored
     fbApiKeyInput.value = localStorage.getItem('fb_apikey') || '';
-    fbProjectIdInput.value = localStorage.getItem('fb_projectid') || 'mydesignProject';
+    fbProjectIdInput.value = localStorage.getItem('fb_projectid') || 'mydesignproject-f22d5';
     fbAppIdInput.value = localStorage.getItem('fb_appid') || '';
     
     const gasUrlInput = document.getElementById('gas-url');
