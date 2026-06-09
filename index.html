@@ -403,19 +403,19 @@
                 
                 <div class="menu-item-card">
                   <div class="menu-item-img-box">
-                    <img src="menu-tiramisu_20260519_205353.jpg" alt="提拉米蘇" loading="lazy" />
+                    <img src="menu-tiramisu_20260519_205353.jpg" alt="手工提拉米蘇" loading="lazy" />
                   </div>
                   <div class="menu-item-info">
-                    <p class="menu-item-name">提拉米蘇</p>
+                    <p class="menu-item-name">手工提拉米蘇</p>
                   </div>
                 </div>
 
                 <div class="menu-item-card">
                   <div class="menu-item-img-box">
-                    <img src="menu-carrot-cake_20260519_205435.jpg" alt="胡蘿蔔蛋糕" loading="lazy" />
+                    <img src="menu-carrot-cake_20260519_205435.jpg" alt="招牌胡蘿蔔蛋糕" loading="lazy" />
                   </div>
                   <div class="menu-item-info">
-                    <p class="menu-item-name">胡蘿蔔蛋糕</p>
+                    <p class="menu-item-name">招牌胡蘿蔔蛋糕</p>
                   </div>
                 </div>
 
@@ -824,6 +824,50 @@
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
               <span style="font-weight: 600;">🍝 肉醬千層麵</span>
               <input type="number" class="menu-item-qty form-input" data-dish="肉醬千層麵" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 甜點點餐 -->
+        <div id="dessert-ordering-section" style="margin-bottom: 20px; background: var(--bg-secondary); padding: 16px; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+          <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 4px; color: var(--emerald-dark); display: flex; justify-content: space-between; align-items: center;">
+            <span>🍰 甜點點餐</span>
+            <span id="dessert-selected-status" style="font-size: 0.75rem; font-weight: 600; color: var(--emerald-dark);">已選 0 / 1 份</span>
+          </h4>
+          <p class="config-help" style="margin-bottom: 12px; font-size: 0.65rem; color: var(--text-muted);">請依報名人數點選甜點份數：</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🧁 手工提拉米蘇</span>
+              <input type="number" class="menu-dessert-qty form-input" data-dish="手工提拉米蘇" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🥕 招牌胡蘿蔔蛋糕</span>
+              <input type="number" class="menu-dessert-qty form-input" data-dish="招牌胡蘿蔔蛋糕" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 飲品點餐 -->
+        <div id="drink-ordering-section" style="margin-bottom: 20px; background: var(--bg-secondary); padding: 16px; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+          <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 4px; color: var(--emerald-dark); display: flex; justify-content: space-between; align-items: center;">
+            <span>☕ 飲品點餐</span>
+            <span id="drink-selected-status" style="font-size: 0.75rem; font-weight: 600; color: var(--emerald-dark);">已選 0 / 1 份</span>
+          </h4>
+          <p class="config-help" style="margin-bottom: 12px; font-size: 0.65rem; color: var(--text-muted);">請依報名人數點選飲品份數：</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">☕ 熱可可茶</span>
+              <input type="number" class="menu-drink-qty form-input" data-dish="熱可可茶" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🥤 健康氣泡飲</span>
+              <input type="number" class="menu-drink-qty form-input" data-dish="健康氣泡飲" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🥛 微甜小農豆漿</span>
+              <input type="number" class="menu-drink-qty form-input" data-dish="微甜小農豆漿" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
             </div>
           </div>
         </div>

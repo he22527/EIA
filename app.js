@@ -643,12 +643,18 @@ function setupFormListeners() {
   const regChildChair = document.getElementById('reg-child-chair');
   const menuSelectedStatus = document.getElementById('menu-selected-status');
   const menuItemQties = document.querySelectorAll('.menu-item-qty');
+  const dessertSelectedStatus = document.getElementById('dessert-selected-status');
+  const menuDessertQties = document.querySelectorAll('.menu-dessert-qty');
+  const drinkSelectedStatus = document.getElementById('drink-selected-status');
+  const menuDrinkQties = document.querySelectorAll('.menu-drink-qty');
 
   if (!regCount || !regAdults || !regChildren) return;
 
   // Function to update the menu selected status display
   function updateMenuStatus() {
     const totalCount = parseInt(regCount.value) || 0;
+    
+    // Main Course
     let selectedSum = 0;
     menuItemQties.forEach(input => {
       selectedSum += parseInt(input.value) || 0;
@@ -660,6 +666,36 @@ function setupFormListeners() {
         menuSelectedStatus.style.color = '#ef4444'; // Red if mismatch
       } else {
         menuSelectedStatus.style.color = 'var(--emerald-dark)'; // Green if match
+      }
+    }
+
+    // Dessert
+    let dessertSum = 0;
+    menuDessertQties.forEach(input => {
+      dessertSum += parseInt(input.value) || 0;
+    });
+
+    if (dessertSelectedStatus) {
+      dessertSelectedStatus.textContent = `已選 ${dessertSum} / ${totalCount} 份`;
+      if (dessertSum !== totalCount) {
+        dessertSelectedStatus.style.color = '#ef4444';
+      } else {
+        dessertSelectedStatus.style.color = 'var(--emerald-dark)';
+      }
+    }
+
+    // Drink
+    let drinkSum = 0;
+    menuDrinkQties.forEach(input => {
+      drinkSum += parseInt(input.value) || 0;
+    });
+
+    if (drinkSelectedStatus) {
+      drinkSelectedStatus.textContent = `已選 ${drinkSum} / ${totalCount} 份`;
+      if (drinkSum !== totalCount) {
+        drinkSelectedStatus.style.color = '#ef4444';
+      } else {
+        drinkSelectedStatus.style.color = 'var(--emerald-dark)';
       }
     }
   }
@@ -712,6 +748,24 @@ function setupFormListeners() {
 
   // Bind menu item changes
   menuItemQties.forEach(input => {
+    input.addEventListener('input', () => {
+      let val = parseInt(input.value) || 0;
+      if (val < 0) input.value = 0;
+      updateMenuStatus();
+    });
+  });
+
+  // Bind dessert item changes
+  menuDessertQties.forEach(input => {
+    input.addEventListener('input', () => {
+      let val = parseInt(input.value) || 0;
+      if (val < 0) input.value = 0;
+      updateMenuStatus();
+    });
+  });
+
+  // Bind drink item changes
+  menuDrinkQties.forEach(input => {
     input.addEventListener('input', () => {
       let val = parseInt(input.value) || 0;
       if (val < 0) input.value = 0;
@@ -773,12 +827,54 @@ async function handleRegisterSubmit() {
     return;
   }
 
+  // 4. Validate Dessert Qty Sum == Count
+  const menuDessertQties = document.querySelectorAll('.menu-dessert-qty');
+  let dessertSum = 0;
+  const dessertOrders = {};
+  menuDessertQties.forEach(input => {
+    const qty = parseInt(input.value) || 0;
+    const dish = input.dataset.dish;
+    dessertOrders[dish] = qty;
+    dessertSum += qty;
+  });
+
+  if (dessertSum !== count) {
+    showRegStatus('error', `❌ 點選甜點總數 (${dessertSum} 份) 必須等於報名總人數 (${count} 份)！`);
+    return;
+  }
+
+  // 5. Validate Drink Qty Sum == Count
+  const menuDrinkQties = document.querySelectorAll('.menu-drink-qty');
+  let drinkSum = 0;
+  const drinkOrders = {};
+  menuDrinkQties.forEach(input => {
+    const qty = parseInt(input.value) || 0;
+    const dish = input.dataset.dish;
+    drinkOrders[dish] = qty;
+    drinkSum += qty;
+  });
+
+  if (drinkSum !== count) {
+    showRegStatus('error', `❌ 點選飲品總數 (${drinkSum} 份) 必須等於報名總人數 (${count} 份)！`);
+    return;
+  }
+
   showRegStatus('info', '⏳ 正在提交報名資料，請稍候...');
   const submitBtn = document.getElementById('reg-submit');
   submitBtn.disabled = true;
 
   // Format orders text for display/email
   const ordersListText = Object.entries(orders)
+    .filter(([_, qty]) => qty > 0)
+    .map(([dish, qty]) => `${dish}: ${qty}份`)
+    .join(', ');
+
+  const dessertsListText = Object.entries(dessertOrders)
+    .filter(([_, qty]) => qty > 0)
+    .map(([dish, qty]) => `${dish}: ${qty}份`)
+    .join(', ');
+
+  const drinksListText = Object.entries(drinkOrders)
     .filter(([_, qty]) => qty > 0)
     .map(([dish, qty]) => `${dish}: ${qty}份`)
     .join(', ');
@@ -798,19 +894,21 @@ async function handleRegisterSubmit() {
         childSchool: childSchool,
         childChair: childChair,
         orders: orders,
+        desserts: dessertOrders,
+        drinks: drinkOrders,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
       dbSuccess = true;
       dbMsg = '已上傳至雲端 Firebase';
     } catch (error) {
       console.error("Firestore submit error:", error);
-      saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders);
+      saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders, dessertOrders, drinkOrders);
       dbSuccess = false;
       dbMsg = `雲端儲存失敗 (${error.message})，已備份至瀏覽器`;
     }
   } else {
     // Local fallback when Firebase config is missing
-    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders);
+    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders, dessertOrders, drinkOrders);
     dbSuccess = savedLocal;
     dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
   }
@@ -835,6 +933,8 @@ async function handleRegisterSubmit() {
     }
 
     emailPayload["午餐點餐明細"] = ordersListText;
+    emailPayload["甜點點餐明細"] = dessertsListText;
+    emailPayload["飲品點餐明細"] = drinksListText;
     emailPayload["報名時間"] = new Date().toLocaleString('zh-TW');
 
     if (gasUrl) {
@@ -894,6 +994,18 @@ async function handleRegisterSubmit() {
       menuSelectedStatus.textContent = '已選 0 / 1 份';
       menuSelectedStatus.style.color = '#ef4444';
     }
+
+    const dessertSelectedStatus = document.getElementById('dessert-selected-status');
+    if (dessertSelectedStatus) {
+      dessertSelectedStatus.textContent = '已選 0 / 1 份';
+      dessertSelectedStatus.style.color = '#ef4444';
+    }
+
+    const drinkSelectedStatus = document.getElementById('drink-selected-status');
+    if (drinkSelectedStatus) {
+      drinkSelectedStatus.textContent = '已選 0 / 1 份';
+      drinkSelectedStatus.style.color = '#ef4444';
+    }
   } else {
     showRegStatus('error', `❌ 報名失敗：${dbMsg}。`);
   }
@@ -901,7 +1013,7 @@ async function handleRegisterSubmit() {
 }
 
 // Fallback logic to save registration data in localStorage (with details)
-function saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders) {
+function saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders, desserts, drinks) {
   try {
     const localData = JSON.parse(localStorage.getItem('beitou_registrations') || '[]');
     localData.push({
@@ -913,6 +1025,8 @@ function saveToLocalFallbackData(name, count, adults, children, childUnder, chil
       childSchool: childSchool,
       childChair: childChair,
       orders: orders,
+      desserts: desserts,
+      drinks: drinks,
       timestamp: new Date().toISOString()
     });
     localStorage.setItem('beitou_registrations', JSON.stringify(localData));
