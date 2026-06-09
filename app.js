@@ -638,8 +638,6 @@ function setupFormListeners() {
   const regAdults = document.getElementById('reg-adults');
   const regChildren = document.getElementById('reg-children');
   const childDetailsSection = document.getElementById('child-details-section');
-  const regChildUnder = document.getElementById('reg-child-under');
-  const regChildSchool = document.getElementById('reg-child-school');
   const regChildChair = document.getElementById('reg-child-chair');
   const menuSelectedStatus = document.getElementById('menu-selected-status');
   const menuItemQties = document.querySelectorAll('.menu-item-qty');
@@ -711,15 +709,8 @@ function setupFormListeners() {
     if (childDetailsSection) {
       if (children > 0) {
         childDetailsSection.style.display = 'block';
-        // Auto-allocate children if they sum to 0
-        const currentChildSum = (parseInt(regChildUnder.value) || 0) + (parseInt(regChildSchool.value) || 0);
-        if (currentChildSum === 0) {
-          regChildSchool.value = children;
-        }
       } else {
         childDetailsSection.style.display = 'none';
-        if (regChildUnder) regChildUnder.value = 0;
-        if (regChildSchool) regChildSchool.value = 0;
         if (regChildChair) regChildChair.value = '否';
       }
     }
@@ -739,8 +730,6 @@ function setupFormListeners() {
     regChildren.value = 0;
     if (childDetailsSection) {
       childDetailsSection.style.display = 'none';
-      if (regChildUnder) regChildUnder.value = 0;
-      if (regChildSchool) regChildSchool.value = 0;
       if (regChildChair) regChildChair.value = '否';
     }
     updateMenuStatus();
@@ -796,19 +785,10 @@ async function handleRegisterSubmit() {
   }
 
   // 2. Validate Children details if Children > 0
-  let childUnder = 0;
-  let childSchool = 0;
   let childChair = '否';
 
   if (children > 0) {
-    childUnder = parseInt(document.getElementById('reg-child-under').value) || 0;
-    childSchool = parseInt(document.getElementById('reg-child-school').value) || 0;
     childChair = document.getElementById('reg-child-chair').value;
-
-    if (childUnder + childSchool !== children) {
-      showRegStatus('error', '❌ 國小以下與國小人數總和必須等於小孩人數！');
-      return;
-    }
   }
 
   // 3. Validate Menu Order Qty Sum == Count
@@ -827,7 +807,7 @@ async function handleRegisterSubmit() {
     return;
   }
 
-  // 4. Validate Dessert Qty Sum == Count
+  // 4. Gather Dessert Qty
   const menuDessertQties = document.querySelectorAll('.menu-dessert-qty');
   let dessertSum = 0;
   const dessertOrders = {};
@@ -838,12 +818,7 @@ async function handleRegisterSubmit() {
     dessertSum += qty;
   });
 
-  if (dessertSum !== count) {
-    showRegStatus('error', `❌ 點選甜點總數 (${dessertSum} 份) 必須等於報名總人數 (${count} 份)！`);
-    return;
-  }
-
-  // 5. Validate Drink Qty Sum == Count
+  // 5. Gather Drink Qty
   const menuDrinkQties = document.querySelectorAll('.menu-drink-qty');
   let drinkSum = 0;
   const drinkOrders = {};
@@ -854,9 +829,12 @@ async function handleRegisterSubmit() {
     drinkSum += qty;
   });
 
-  if (drinkSum !== count) {
-    showRegStatus('error', `❌ 點選飲品總數 (${drinkSum} 份) 必須等於報名總人數 (${count} 份)！`);
-    return;
+  // 6. Check consistency of Dessert and Drink sums against Main Course sum
+  if (dessertSum !== selectedSum || drinkSum !== selectedSum) {
+    const wantToFix = confirm("⚠️ 您的甜點或飲品點餐數量與主餐數量（報名總人數）不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
+    if (wantToFix) {
+      return; // Return to form for adjustment
+    }
   }
 
   showRegStatus('info', '⏳ 正在提交報名資料，請稍候...');
@@ -890,8 +868,6 @@ async function handleRegisterSubmit() {
         count: count,
         adults: adults,
         children: children,
-        childUnderSchool: childUnder,
-        childSchool: childSchool,
         childChair: childChair,
         orders: orders,
         desserts: dessertOrders,
@@ -902,13 +878,13 @@ async function handleRegisterSubmit() {
       dbMsg = '已上傳至雲端 Firebase';
     } catch (error) {
       console.error("Firestore submit error:", error);
-      saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders, dessertOrders, drinkOrders);
+      saveToLocalFallbackData(name, count, adults, children, childChair, orders, dessertOrders, drinkOrders);
       dbSuccess = false;
       dbMsg = `雲端儲存失敗 (${error.message})，已備份至瀏覽器`;
     }
   } else {
     // Local fallback when Firebase config is missing
-    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders, dessertOrders, drinkOrders);
+    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childChair, orders, dessertOrders, drinkOrders);
     dbSuccess = savedLocal;
     dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
   }
@@ -927,8 +903,6 @@ async function handleRegisterSubmit() {
     };
 
     if (children > 0) {
-      emailPayload["國小以下人數"] = `${childUnder} 人`;
-      emailPayload["國小人數"] = `${childSchool} 人`;
       emailPayload["需要孩童椅數量"] = childChair;
     }
 
@@ -1013,7 +987,7 @@ async function handleRegisterSubmit() {
 }
 
 // Fallback logic to save registration data in localStorage (with details)
-function saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders, desserts, drinks) {
+function saveToLocalFallbackData(name, count, adults, children, childChair, orders, desserts, drinks) {
   try {
     const localData = JSON.parse(localStorage.getItem('beitou_registrations') || '[]');
     localData.push({
@@ -1021,8 +995,6 @@ function saveToLocalFallbackData(name, count, adults, children, childUnder, chil
       count: count,
       adults: adults,
       children: children,
-      childUnderSchool: childUnder,
-      childSchool: childSchool,
       childChair: childChair,
       orders: orders,
       desserts: desserts,
