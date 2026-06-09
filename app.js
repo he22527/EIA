@@ -459,9 +459,9 @@ if (heroRegBtn) {
     regForm.reset();
     
     // Pre-fill config values if stored
-    fbApiKeyInput.value = localStorage.getItem('fb_apikey') || '';
+    fbApiKeyInput.value = localStorage.getItem('fb_apikey') || 'AIzaSyCJkm_eA-BJtFzbxO1CyxwK8PbmgHmqq7U';
     fbProjectIdInput.value = localStorage.getItem('fb_projectid') || 'mydesignproject-f22d5';
-    fbAppIdInput.value = localStorage.getItem('fb_appid') || '';
+    fbAppIdInput.value = localStorage.getItem('fb_appid') || '1:940076219394:web:0a8a4b738359378e0c7b1b';
     
     const gasUrlInput = document.getElementById('gas-url');
     if (gasUrlInput) {
@@ -596,9 +596,9 @@ function clearEmailConfig() {
 
 // Initialize Firebase SDK
 function initFirebase() {
-  const apiKey = localStorage.getItem('fb_apikey');
-  const projectId = localStorage.getItem('fb_projectid');
-  const appId = localStorage.getItem('fb_appid');
+  const apiKey = localStorage.getItem('fb_apikey') || 'AIzaSyCJkm_eA-BJtFzbxO1CyxwK8PbmgHmqq7U';
+  const projectId = localStorage.getItem('fb_projectid') || 'mydesignproject-f22d5';
+  const appId = localStorage.getItem('fb_appid') || '1:940076219394:web:0a8a4b738359378e0c7b1b';
 
   if (apiKey && projectId && appId) {
     try {
@@ -829,11 +829,13 @@ async function handleRegisterSubmit() {
     drinkSum += qty;
   });
 
-  // 6. Check consistency of Dessert and Drink sums against Main Course sum
+  // 6. Check consistency of Dessert and Drink sums against Main Course sum, and only warn if there are children
   if (dessertSum !== selectedSum || drinkSum !== selectedSum) {
-    const wantToFix = confirm("⚠️ 您的甜點或飲品點餐數量與主餐數量（報名總人數）不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
-    if (wantToFix) {
-      return; // Return to form for adjustment
+    if (children > 0) {
+      const wantToFix = confirm("⚠️ 您的甜點或飲品點餐數量與主餐數量（報名總人數）不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
+      if (wantToFix) {
+        return; // Return to form for adjustment
+      }
     }
   }
 

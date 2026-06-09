@@ -868,7 +868,7 @@
         <div id="reg-status" class="reg-status-box" style="display: none;"></div>
 
         <!-- Firebase Config Settings (Optional/Collapsible) -->
-        <div class="firebase-config-section">
+        <div class="firebase-config-section" style="display: none;">
           <button type="button" class="config-toggle-btn" onclick="toggleConfigSection()">
             <span>⚙️ Firebase 資料庫設定</span>
             <svg id="config-arrow" class="config-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -877,7 +877,7 @@
             <p class="config-help">配置您的 Firebase Web App 金鑰，報名資料將會即時寫入您的 Firestore：</p>
             <div class="form-group-sm">
               <label for="fb-apikey">API Key</label>
-              <input type="text" id="fb-apikey" placeholder="AIzaSy..." />
+              <input type="text" id="fb-apikey" value="AIzaSyCJkm_eA-BJtFzbxO1CyxwK8PbmgHmqq7U" placeholder="AIzaSy..." />
             </div>
             <div class="form-group-sm">
               <label for="fb-projectid">Project ID</label>
@@ -885,7 +885,7 @@
             </div>
             <div class="form-group-sm">
               <label for="fb-appid">App ID</label>
-              <input type="text" id="fb-appid" placeholder="1:1234:web:abcd" />
+              <input type="text" id="fb-appid" value="1:940076219394:web:0a8a4b738359378e0c7b1b" placeholder="1:1234:web:abcd" />
             </div>
             <button type="button" class="btn-sm" onclick="saveFirebaseConfig()">儲存 Firebase 設定</button>
             <button type="button" class="btn-sm btn-clear" onclick="clearFirebaseConfig()">清除設定</button>
@@ -893,7 +893,7 @@
         </div>
 
         <!-- Email Notification Settings (Collapsible) -->
-        <div class="firebase-config-section" style="margin-top: 16px;">
+        <div class="firebase-config-section" style="display: none; margin-top: 16px;">
           <button type="button" class="config-toggle-btn" onclick="toggleEmailConfigSection()">
             <span>📧 Email 通知設定 (自動發送)</span>
             <svg id="email-config-arrow" class="config-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
