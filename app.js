@@ -449,6 +449,7 @@ const configArrow = document.getElementById('config-arrow');
 
 let firestoreDB = null;
 let isFirebaseConnected = false;
+let hasWarnedMismatch = false;
 
 // Open/Close Modal
 if (heroRegBtn) {
@@ -457,6 +458,7 @@ if (heroRegBtn) {
     
     // Reset form inputs to defaults
     regForm.reset();
+    hasWarnedMismatch = false;
     
     // Pre-fill config values if stored
     fbApiKeyInput.value = localStorage.getItem('fb_apikey') || 'AIzaSyCJkm_eA-BJtFzbxO1CyxwK8PbmgHmqq7U';
@@ -831,7 +833,8 @@ async function handleRegisterSubmit() {
 
   // 6. Check consistency of Dessert and Drink sums against Main Course sum, and only warn if there are children
   if (dessertSum !== selectedSum || drinkSum !== selectedSum) {
-    if (children > 0) {
+    if (children > 0 && !hasWarnedMismatch) {
+      hasWarnedMismatch = true;
       const wantToFix = confirm("⚠️ 您的甜點或飲品點餐數量與主餐數量（報名總人數）不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
       if (wantToFix) {
         return; // Return to form for adjustment
@@ -960,6 +963,7 @@ async function handleRegisterSubmit() {
   if (dbSuccess) {
     showRegStatus('success', `🎉 報名成功！${dbMsg}${emailMsg}。歡迎您，${name} (共 ${count} 人)！`);
     regForm.reset();
+    hasWarnedMismatch = false;
     
     // Reset elements manually
     const childDetailsSection = document.getElementById('child-details-section');
