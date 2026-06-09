@@ -294,7 +294,7 @@
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
             </div>
             <div>
-              <h3 class="buffet-title">自助餐菜單 BUFFET</h3>
+              <h3 class="buffet-title">菜單Menu</h3>
               <p class="buffet-subtitle">精選友善食材 · 現場健康烹調</p>
             </div>
           </div>
@@ -761,6 +761,71 @@
         <div class="form-group">
           <label for="reg-count" class="form-label">人數</label>
           <input type="number" id="reg-count" class="form-input" min="1" max="100" value="1" required />
+        </div>
+
+        <!-- 幾大幾小 -->
+        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div class="form-group-sm" style="margin-bottom: 0;">
+            <label for="reg-adults" class="form-label" style="font-size: 0.8rem; margin-bottom: 6px;">大人人數</label>
+            <input type="number" id="reg-adults" class="form-input" min="0" value="1" required style="padding: 10px 14px;" />
+          </div>
+          <div class="form-group-sm" style="margin-bottom: 0;">
+            <label for="reg-children" class="form-label" style="font-size: 0.8rem; margin-bottom: 6px;">小孩人數</label>
+            <input type="number" id="reg-children" class="form-input" min="0" value="0" required style="padding: 10px 14px;" />
+          </div>
+        </div>
+
+        <!-- 小孩條件詢問區區 -->
+        <div id="child-details-section" style="display: none; margin-bottom: 20px; background: var(--bg-secondary); border-left: 3px solid var(--emerald); padding: 16px; border-radius: 0 var(--radius-md) var(--radius-md) 0; border-top: 1px solid var(--border-color); border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color);">
+          <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 12px; color: var(--emerald-dark);">👶 孩童資訊及坐椅需求</h4>
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+            <div class="form-group-sm" style="margin-bottom: 0;">
+              <label for="reg-child-under" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; display: block;">國小以下人數</label>
+              <input type="number" id="reg-child-under" class="form-input" min="0" value="0" style="padding: 8px 12px; font-size: 0.85rem;" />
+            </div>
+            <div class="form-group-sm" style="margin-bottom: 0;">
+              <label for="reg-child-school" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; display: block;">國小人數</label>
+              <input type="number" id="reg-child-school" class="form-input" min="0" value="0" style="padding: 8px 12px; font-size: 0.85rem;" />
+            </div>
+          </div>
+          <div class="form-group-sm" style="margin-bottom: 0; display: flex; flex-direction: column; gap: 4px;">
+            <label for="reg-child-chair" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary);">需要孩童椅嗎？</label>
+            <select id="reg-child-chair" class="form-input" style="padding: 8px 12px; font-size: 0.85rem; background-color: var(--bg-card);">
+              <option value="否">不需要孩童椅</option>
+              <option value="1">需要 1 張</option>
+              <option value="2">需要 2 張</option>
+              <option value="3">需要 3 張</option>
+              <option value="4">需要 4 張</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- 午餐點餐 -->
+        <div id="menu-ordering-section" style="margin-bottom: 20px; background: var(--bg-secondary); padding: 16px; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+          <h4 style="font-size: 0.88rem; font-weight: 800; margin-bottom: 4px; color: var(--emerald-dark); display: flex; justify-content: space-between; align-items: center;">
+            <span>🍽️ 午餐主餐點餐</span>
+            <span id="menu-selected-status" style="font-size: 0.75rem; font-weight: 600; color: var(--emerald-dark);">已選 0 / 1 份</span>
+          </h4>
+          <p class="config-help" style="margin-bottom: 12px; font-size: 0.65rem; color: var(--text-muted);">請依報名人數點選主餐份數：</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🥩 咖喱牛筋膜</span>
+              <input type="number" class="menu-item-qty form-input" data-dish="咖喱牛筋膜" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🍗 牛肝菌燉雞</span>
+              <input type="number" class="menu-item-qty form-input" data-dish="牛肝菌燉雞" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🍆 普羅旺斯燉菜 (全素)</span>
+              <input type="number" class="menu-item-qty form-input" data-dish="普羅旺斯燉菜" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+              <span style="font-weight: 600;">🍝 肉醬千層麵</span>
+              <input type="number" class="menu-item-qty form-input" data-dish="肉醬千層麵" min="0" value="0" style="width: 70px; padding: 6px 10px; font-size: 0.8rem; text-align: center; background-color: var(--bg-card);" />
+            </div>
+          </div>
         </div>
         
         <button type="submit" id="reg-submit" class="btn-primary btn-emerald" style="margin-top: 24px; background: var(--emerald);">確認送出</button>

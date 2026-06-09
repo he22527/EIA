@@ -454,6 +454,10 @@ let isFirebaseConnected = false;
 if (heroRegBtn) {
   heroRegBtn.addEventListener('click', () => {
     regModal.classList.add('active');
+    
+    // Reset form inputs to defaults
+    regForm.reset();
+    
     // Pre-fill config values if stored
     fbApiKeyInput.value = localStorage.getItem('fb_apikey') || '';
     fbProjectIdInput.value = localStorage.getItem('fb_projectid') || 'mydesignProject';
@@ -467,6 +471,16 @@ if (heroRegBtn) {
     // Clear status
     regStatus.style.display = 'none';
     regStatus.className = 'reg-status-box';
+
+    // Manually trigger child section hiding and menu status updates
+    const childDetailsSection = document.getElementById('child-details-section');
+    if (childDetailsSection) childDetailsSection.style.display = 'none';
+    
+    const menuSelectedStatus = document.getElementById('menu-selected-status');
+    if (menuSelectedStatus) {
+      menuSelectedStatus.textContent = '已選 0 / 1 份';
+      menuSelectedStatus.style.color = '#ef4444';
+    }
   });
 }
 
@@ -616,19 +630,158 @@ function showRegStatus(type, message) {
   regStatus.style.display = 'block';
 }
 
+// ==========================================================================
+// DYNAMIC REGISTRATION FORM LOGIC (ADULTS/CHILDREN & MENU SELECTION)
+// ==========================================================================
+function setupFormListeners() {
+  const regCount = document.getElementById('reg-count');
+  const regAdults = document.getElementById('reg-adults');
+  const regChildren = document.getElementById('reg-children');
+  const childDetailsSection = document.getElementById('child-details-section');
+  const regChildUnder = document.getElementById('reg-child-under');
+  const regChildSchool = document.getElementById('reg-child-school');
+  const regChildChair = document.getElementById('reg-child-chair');
+  const menuSelectedStatus = document.getElementById('menu-selected-status');
+  const menuItemQties = document.querySelectorAll('.menu-item-qty');
+
+  if (!regCount || !regAdults || !regChildren) return;
+
+  // Function to update the menu selected status display
+  function updateMenuStatus() {
+    const totalCount = parseInt(regCount.value) || 0;
+    let selectedSum = 0;
+    menuItemQties.forEach(input => {
+      selectedSum += parseInt(input.value) || 0;
+    });
+
+    if (menuSelectedStatus) {
+      menuSelectedStatus.textContent = `已選 ${selectedSum} / ${totalCount} 份`;
+      if (selectedSum !== totalCount) {
+        menuSelectedStatus.style.color = '#ef4444'; // Red if mismatch
+      } else {
+        menuSelectedStatus.style.color = 'var(--emerald-dark)'; // Green if match
+      }
+    }
+  }
+
+  // Update total count based on adults + children
+  function handleAdultsChildrenChange() {
+    const adults = parseInt(regAdults.value) || 0;
+    const children = parseInt(regChildren.value) || 0;
+    const total = adults + children;
+    regCount.value = total;
+
+    // Toggle child details section
+    if (childDetailsSection) {
+      if (children > 0) {
+        childDetailsSection.style.display = 'block';
+        // Auto-allocate children if they sum to 0
+        const currentChildSum = (parseInt(regChildUnder.value) || 0) + (parseInt(regChildSchool.value) || 0);
+        if (currentChildSum === 0) {
+          regChildSchool.value = children;
+        }
+      } else {
+        childDetailsSection.style.display = 'none';
+        if (regChildUnder) regChildUnder.value = 0;
+        if (regChildSchool) regChildSchool.value = 0;
+        if (regChildChair) regChildChair.value = '否';
+      }
+    }
+
+    updateMenuStatus();
+  }
+
+  // Bind change/input events for adults and children
+  regAdults.addEventListener('input', handleAdultsChildrenChange);
+  regChildren.addEventListener('input', handleAdultsChildrenChange);
+
+  // When total count is edited directly
+  regCount.addEventListener('input', () => {
+    const total = parseInt(regCount.value) || 1;
+    // Set adults to total, children to 0
+    regAdults.value = total;
+    regChildren.value = 0;
+    if (childDetailsSection) {
+      childDetailsSection.style.display = 'none';
+      if (regChildUnder) regChildUnder.value = 0;
+      if (regChildSchool) regChildSchool.value = 0;
+      if (regChildChair) regChildChair.value = '否';
+    }
+    updateMenuStatus();
+  });
+
+  // Bind menu item changes
+  menuItemQties.forEach(input => {
+    input.addEventListener('input', () => {
+      let val = parseInt(input.value) || 0;
+      if (val < 0) input.value = 0;
+      updateMenuStatus();
+    });
+  });
+
+  // Initial call to setup correct displays
+  updateMenuStatus();
+}
+
 // Handle Form Submission
 async function handleRegisterSubmit() {
   const name = document.getElementById('reg-name').value.trim();
-  const count = parseInt(document.getElementById('reg-count').value);
+  const count = parseInt(document.getElementById('reg-count').value) || 0;
+  const adults = parseInt(document.getElementById('reg-adults').value) || 0;
+  const children = parseInt(document.getElementById('reg-children').value) || 0;
 
-  if (!name || isNaN(count) || count < 1) {
-    showRegStatus('error', '❌ 請輸入有效的姓名與人數！');
+  if (!name) {
+    showRegStatus('error', '❌ 請輸入您的姓名！');
+    return;
+  }
+
+  // 1. Validate Adults + Children == Count
+  if (adults + children !== count) {
+    showRegStatus('error', '❌ 大人人數加上小孩人數必須等於報名總人數！');
+    return;
+  }
+
+  // 2. Validate Children details if Children > 0
+  let childUnder = 0;
+  let childSchool = 0;
+  let childChair = '否';
+
+  if (children > 0) {
+    childUnder = parseInt(document.getElementById('reg-child-under').value) || 0;
+    childSchool = parseInt(document.getElementById('reg-child-school').value) || 0;
+    childChair = document.getElementById('reg-child-chair').value;
+
+    if (childUnder + childSchool !== children) {
+      showRegStatus('error', '❌ 國小以下與國小人數總和必須等於小孩人數！');
+      return;
+    }
+  }
+
+  // 3. Validate Menu Order Qty Sum == Count
+  const menuItemQties = document.querySelectorAll('.menu-item-qty');
+  let selectedSum = 0;
+  const orders = {};
+  menuItemQties.forEach(input => {
+    const qty = parseInt(input.value) || 0;
+    const dish = input.dataset.dish;
+    orders[dish] = qty;
+    selectedSum += qty;
+  });
+
+  if (selectedSum !== count) {
+    showRegStatus('error', `❌ 點選主餐總數 (${selectedSum} 份) 必須等於報名總人數 (${count} 份)！`);
     return;
   }
 
   showRegStatus('info', '⏳ 正在提交報名資料，請稍候...');
   const submitBtn = document.getElementById('reg-submit');
   submitBtn.disabled = true;
+
+  // Format orders text for display/email
+  const ordersListText = Object.entries(orders)
+    .filter(([_, qty]) => qty > 0)
+    .map(([dish, qty]) => `${dish}: ${qty}份`)
+    .join(', ');
 
   let dbSuccess = false;
   let dbMsg = '';
@@ -639,27 +792,51 @@ async function handleRegisterSubmit() {
       await firestoreDB.collection("beitou_registrations").add({
         name: name,
         count: count,
+        adults: adults,
+        children: children,
+        childUnderSchool: childUnder,
+        childSchool: childSchool,
+        childChair: childChair,
+        orders: orders,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
       dbSuccess = true;
       dbMsg = '已上傳至雲端 Firebase';
     } catch (error) {
       console.error("Firestore submit error:", error);
-      saveToLocalFallback(name, count);
+      saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders);
       dbSuccess = false;
       dbMsg = `雲端儲存失敗 (${error.message})，已備份至瀏覽器`;
     }
   } else {
     // Local fallback when Firebase config is missing
-    const savedLocal = saveToLocalFallback(name, count);
+    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders);
     dbSuccess = savedLocal;
     dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
   }
 
-  // Handle email notification
+  // Handle email notification via GAS or FormSubmit.co
   let emailMsg = '';
   if (dbSuccess) {
     const gasUrl = localStorage.getItem('gas_url');
+    
+    // Build unified data payload for email
+    const emailPayload = {
+      "姓名": name,
+      "總人數": `${count} 人`,
+      "大人人數": `${adults} 人`,
+      "小孩人數": `${children} 人`
+    };
+
+    if (children > 0) {
+      emailPayload["國小以下人數"] = `${childUnder} 人`;
+      emailPayload["國小人數"] = `${childSchool} 人`;
+      emailPayload["需要孩童椅數量"] = childChair;
+    }
+
+    emailPayload["午餐點餐明細"] = ordersListText;
+    emailPayload["報名時間"] = new Date().toLocaleString('zh-TW');
+
     if (gasUrl) {
       // Send via Google Apps Script (No verification required, sends immediately)
       try {
@@ -669,10 +846,7 @@ async function handleRegisterSubmit() {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            name: name,
-            count: count
-          })
+          body: JSON.stringify(emailPayload)
         });
         emailMsg = '，且已成功發送通知信 (透過 Google Apps Script)';
       } catch (e) {
@@ -691,9 +865,7 @@ async function handleRegisterSubmit() {
           body: JSON.stringify({
             _subject: `【北投來走走】新報名通知：${name}`,
             _cc: 'g0306@ceci.com.tw,taiwan.kwei@gmail.com',
-            "姓名": name,
-            "參加人數": `${count} 人`,
-            "報名時間": new Date().toLocaleString('zh-TW'),
+            ...emailPayload,
             _template: 'box'
           })
         });
@@ -712,19 +884,35 @@ async function handleRegisterSubmit() {
   if (dbSuccess) {
     showRegStatus('success', `🎉 報名成功！${dbMsg}${emailMsg}。歡迎您，${name} (共 ${count} 人)！`);
     regForm.reset();
+    
+    // Reset elements manually
+    const childDetailsSection = document.getElementById('child-details-section');
+    if (childDetailsSection) childDetailsSection.style.display = 'none';
+    
+    const menuSelectedStatus = document.getElementById('menu-selected-status');
+    if (menuSelectedStatus) {
+      menuSelectedStatus.textContent = '已選 0 / 1 份';
+      menuSelectedStatus.style.color = '#ef4444';
+    }
   } else {
     showRegStatus('error', `❌ 報名失敗：${dbMsg}。`);
   }
   submitBtn.disabled = false;
 }
 
-// Fallback logic to save registration data in localStorage (without status print)
-function saveToLocalFallback(name, count) {
+// Fallback logic to save registration data in localStorage (with details)
+function saveToLocalFallbackData(name, count, adults, children, childUnder, childSchool, childChair, orders) {
   try {
     const localData = JSON.parse(localStorage.getItem('beitou_registrations') || '[]');
     localData.push({
       name: name,
       count: count,
+      adults: adults,
+      children: children,
+      childUnderSchool: childUnder,
+      childSchool: childSchool,
+      childChair: childChair,
+      orders: orders,
       timestamp: new Date().toISOString()
     });
     localStorage.setItem('beitou_registrations', JSON.stringify(localData));
@@ -743,4 +931,5 @@ document.addEventListener('DOMContentLoaded', () => {
   loadWeather();
   loadBibleVerse();
   initFirebase(); // Try initializing Firebase
+  setupFormListeners(); // Set up registration form handlers
 });

@@ -10,26 +10,33 @@
 //    - 專案說明：北投來走走報名通知
 //    - 執行身分：我 (您的 Google 帳號)
 //    - 誰有權限存取：所有人 (Anyone)
-// 6. 點擊「部署」，授予權限，複製產生的「網頁應用程式 URL」。
+// 6. 點擊「部署」，授權存取，複製產生的「網頁應用程式 URL」。
 // 7. 將 URL 貼入網頁報名彈出視窗的「Email 設定」中儲存即可！
 
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
-    var name = data.name || "未提供姓名";
-    var count = data.count || 1;
     
-    // 設定收件人信箱 (逗號分隔即可同時寄送)
+    // 設定收件人信箱
     var recipients = "taiwan.kwei@ceci.com.tw,g0306@ceci.com.tw,taiwan.kwei@gmail.com";
     
-    var subject = "【北投來走走】新報名通知：" + name;
-    var body = "您好，收到新的活動報名：\n\n" +
-               "姓名：" + name + "\n" +
-               "參加人數：" + count + " 人\n" +
-               "報名時間：" + new Date().toLocaleString("zh-TW") + "\n\n" +
-               "這是一封來自您的網站「北投來走走」的自動報名通知信。";
+    var subject = "【北投來走走】新報名通知：" + (data["姓名"] || "未知姓名");
+    
+    // 自動尋覽所有欄位，產生成立體且詳細的 Email 內容
+    var body = "您好，收到新的活動報名，明細如下：\n";
+    body += "========================================\n\n";
+    
+    for (var key in data) {
+      // 排除系統隱藏欄位
+      if (key.indexOf('_') === 0) continue;
+      
+      body += "● " + key + "：" + data[key] + "\n";
+    }
+    
+    body += "\n========================================\n";
+    body += "這是一封來自您的網站「北投來走走」的自動報名通知信。";
                
-    // 使用 Google 郵件服務寄送信件 (免驗證信，即時寄送)
+    // 使用 Google 郵件服務寄送信件
     MailApp.sendEmail(recipients, subject, body);
     
     return ContentService.createTextOutput(JSON.stringify({ "status": "success", "message": "Emails sent successfully" }))

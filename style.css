@@ -1974,6 +1974,8 @@ footer {
   border-radius: var(--radius-xl);
   width: 420px;
   max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   padding: 32px;
   box-shadow: var(--shadow-xl);
   position: relative;
