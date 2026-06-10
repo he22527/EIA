@@ -754,8 +754,13 @@ async function handleRegisterSubmit() {
   });
 
   if (selectedSum !== count) {
-    showRegStatus('error', `❌ 點選主餐總數 (${selectedSum} 份) 必須等於報名總人數 (${count} 份)！`);
-    return;
+    if (children > 0 && !hasWarnedMismatch) {
+      hasWarnedMismatch = true;
+      const wantToFix = confirm("⚠️ 您的主餐點餐數量與報名總人數不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
+      if (wantToFix) {
+        return; // Return to form for adjustment
+      }
+    }
   }
 
   showRegStatus('info', '⏳ 正在提交報名資料，請稍候...');
