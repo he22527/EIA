@@ -667,11 +667,10 @@ function setupFormListeners() {
 
   }
 
-  // Function to update child chair dropdown options based on total count
+  // Function to update child chair dropdown options based on children count
   function updateChildChairOptions() {
     if (!regChildChair) return;
-    const totalCount = parseInt(regCount.value) || 0;
-    const maxChairs = Math.max(0, totalCount - 2);
+    const childrenCount = parseInt(regChildren.value) || 0;
     const currentSelected = regChildChair.value;
 
     regChildChair.innerHTML = '';
@@ -681,14 +680,14 @@ function setupFormListeners() {
     defaultOpt.textContent = '不需要孩童椅';
     regChildChair.appendChild(defaultOpt);
 
-    for (let i = 1; i <= maxChairs; i++) {
+    for (let i = 1; i <= childrenCount; i++) {
       const opt = document.createElement('option');
       opt.value = i.toString();
       opt.textContent = `需要 ${i} 張`;
       regChildChair.appendChild(opt);
     }
 
-    if (currentSelected !== '否' && parseInt(currentSelected) <= maxChairs) {
+    if (currentSelected !== '否' && parseInt(currentSelected) <= childrenCount) {
       regChildChair.value = currentSelected;
     } else {
       regChildChair.value = '否';
@@ -709,6 +708,7 @@ function setupFormListeners() {
     }
 
     updateMenuStatus();
+    updateChildChairOptions();
   }
 
   // Bind change/input events for adults and children
@@ -718,7 +718,6 @@ function setupFormListeners() {
   // When total count is edited directly
   regCount.addEventListener('input', () => {
     updateMenuStatus();
-    updateChildChairOptions();
   });
 
   // Bind menu item changes
@@ -760,11 +759,11 @@ async function handleRegisterSubmit() {
     childChair = document.getElementById('reg-child-chair').value;
   }
 
-  // Validate that child chair count is strictly less than totalCount - 1
+  // Validate that child chair count does not exceed children count
   if (childChair !== '否') {
     const chairCount = parseInt(childChair) || 0;
-    if (chairCount >= count - 1) {
-      showRegStatus('error', '❌ 孩童椅需求的數量必須小於總人數 - 1！');
+    if (chairCount > children) {
+      showRegStatus('error', '❌ 孩童椅需求的數量不能大於小孩人數！');
       return;
     }
   }
