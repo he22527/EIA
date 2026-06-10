@@ -667,6 +667,34 @@ function setupFormListeners() {
 
   }
 
+  // Function to update child chair dropdown options based on total count
+  function updateChildChairOptions() {
+    if (!regChildChair) return;
+    const totalCount = parseInt(regCount.value) || 0;
+    const maxChairs = Math.max(0, totalCount - 2);
+    const currentSelected = regChildChair.value;
+
+    regChildChair.innerHTML = '';
+
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '否';
+    defaultOpt.textContent = '不需要孩童椅';
+    regChildChair.appendChild(defaultOpt);
+
+    for (let i = 1; i <= maxChairs; i++) {
+      const opt = document.createElement('option');
+      opt.value = i.toString();
+      opt.textContent = `需要 ${i} 張`;
+      regChildChair.appendChild(opt);
+    }
+
+    if (currentSelected !== '否' && parseInt(currentSelected) <= maxChairs) {
+      regChildChair.value = currentSelected;
+    } else {
+      regChildChair.value = '否';
+    }
+  }
+
   function handleAdultsChildrenChange() {
     const children = parseInt(regChildren.value) || 0;
 
@@ -690,6 +718,7 @@ function setupFormListeners() {
   // When total count is edited directly
   regCount.addEventListener('input', () => {
     updateMenuStatus();
+    updateChildChairOptions();
   });
 
   // Bind menu item changes
@@ -703,6 +732,7 @@ function setupFormListeners() {
 
   // Initial call to setup correct displays
   updateMenuStatus();
+  updateChildChairOptions();
 }
 
 // Handle Form Submission
@@ -728,6 +758,15 @@ async function handleRegisterSubmit() {
 
   if (children > 0) {
     childChair = document.getElementById('reg-child-chair').value;
+  }
+
+  // Validate that child chair count is strictly less than totalCount - 1
+  if (childChair !== '否') {
+    const chairCount = parseInt(childChair) || 0;
+    if (chairCount >= count - 1) {
+      showRegStatus('error', '❌ 孩童椅需求的數量必須小於總人數 - 1！');
+      return;
+    }
   }
 
   // 3. Validate Menu Order Qty Sum == Count
