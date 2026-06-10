@@ -667,12 +667,8 @@ function setupFormListeners() {
 
   }
 
-  // Update total count based on adults + children
   function handleAdultsChildrenChange() {
-    const adults = parseInt(regAdults.value) || 0;
     const children = parseInt(regChildren.value) || 0;
-    const total = adults + children;
-    regCount.value = total;
 
     // Toggle child details section
     if (childDetailsSection) {
@@ -693,14 +689,6 @@ function setupFormListeners() {
 
   // When total count is edited directly
   regCount.addEventListener('input', () => {
-    const total = parseInt(regCount.value) || 1;
-    // Set adults to total, children to 0
-    regAdults.value = total;
-    regChildren.value = 0;
-    if (childDetailsSection) {
-      childDetailsSection.style.display = 'none';
-      if (regChildChair) regChildChair.value = '否';
-    }
     updateMenuStatus();
   });
 
@@ -756,7 +744,7 @@ async function handleRegisterSubmit() {
   if (selectedSum !== count) {
     if (children > 0 && !hasWarnedMismatch) {
       hasWarnedMismatch = true;
-      const wantToFix = confirm("⚠️ 您的主餐點餐數量與報名總人數不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
+      const wantToFix = confirm("⚠️ 您的主餐點餐數量與報名總人數不一致。\n\n請問您需要補點嗎？\n- 點擊【OK】（要補點）：返回修改點餐數量\n- 點擊【Cancel】（不需要）：直接送出報名並進入下一步");
       if (wantToFix) {
         return; // Return to form for adjustment
       }
