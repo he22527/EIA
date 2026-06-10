@@ -291,8 +291,8 @@ const LOCAL_RESPONSES = [
     response: '當天（2026/06/28）的漫遊行程規劃如下：\n• 10:00 - 捷運新北投站1號出口集合\n• 10:10 - 正式出發探索北投\n• 12:00 - 午餐饗宴（前往奇岩三合街的「銀光食驗室」吃Buffet）\n• 14:40 - 離塵不離城（散步奇岩生態綠洲與磺港溪）\n• 15:10 - 賦歸，平安返家。'
   },
   {
-    keywords: ['吃', '午餐', '菜單', '餐點', '銀光', '食驗室', '對味廚房', '料理', 'buffet', '自助餐'],
-    response: '中午我們會在「對味廚房銀光食驗室」享受高品質現做自助吧！主廚特選動物福利與友善土地食材：\n• 🥩主菜：咖喱牛筋膜、牛肝菌燉雞、普羅旺斯燉菜、肉醬千層麵\n• 🌿素食：烏梅蕃茄乳酪沙拉、蕃茄乳酪義大利麵、青醬乳酪羅馬披薩\n• 🍰甜點：手工提拉米蘇、招牌胡蘿蔔蛋糕\n• ☕飲品：熱可可茶、小農豆漿、健康氣泡飲\n現點現做，健康美味！'
+    keywords: ['吃', '午餐', '菜單', '餐點', '銀光', '食驗室', '對味廚房', '料理', '套餐', '主菜'],
+    response: '中午我們會在「對味廚房銀光食驗室」享用精緻的「舒食套餐組」，使用友善土地與高品質食材，現點現做。本套餐已直接包含：🥗時蔬沙拉、🍲鮮蔬濃湯、🍰手作甜點、🥤特調飲品。主菜則可八選一：\n• 🍗燒烤搖滾雞腿排\n• 🥩紅酒燴牛筋\n• 🥦燒烤時蔬 (素食)\n• 🐟燒烤邱家好魚\n• 🐷燒烤永續豬肉\n• 🍤蒜味油封蝦\n• 🦆燒烤油封履歷鴨腿\n• 🥩和牛牛排\n美味健康，值得期待！'
   },
   {
     keywords: ['捷運', '怎麼去', '地址', '交通', '地圖', '奇岩站', '導航'],
@@ -355,7 +355,7 @@ async function callGeminiAPI(apiKey, query) {
     這個活動主要分為幾個部分：
     1. 時代眷村情：參觀北投中心新村（全台唯一的溫泉軍醫眷村，文史活化）。
     2. 溫泉博物館：百年國定古蹟，羅馬浴池與榻榻米。
-    3. 午餐饗宴：銀光食驗室（地址：台北市北投區三合街一段119號1樓。捷運奇岩站走路5-8分。菜單包括：咖喱牛筋膜、牛肝菌燉雞、烏梅蕃茄乳酪沙拉、羅馬披薩、提拉米蘇、胡蘿蔔蛋糕、熱可可茶等）。
+    3. 午餐饗宴：銀光食驗室（地址：台北市北投區三合街一段119號1樓。捷運奇岩站走路5-8分。菜單為舒食套餐組，包含時蔬沙拉、鮮蔬濃湯、甜點、飲品，主菜可自選如：燒烤搖滾雞腿排、紅酒燴牛筋、燒烤時蔬、燒烤邱家好魚、燒烤永續豬肉、蒜味油封蝦、燒烤油封履歷鴨腿、和牛牛排）。
     4. 離塵不離城：奇岩重劃區生態、限高與磺港溪溪流整治。
     
     請以親切、專業、溫暖的口吻回答旅客關於此行程的任何問題。
@@ -643,10 +643,6 @@ function setupFormListeners() {
   const regChildChair = document.getElementById('reg-child-chair');
   const menuSelectedStatus = document.getElementById('menu-selected-status');
   const menuItemQties = document.querySelectorAll('.menu-item-qty');
-  const dessertSelectedStatus = document.getElementById('dessert-selected-status');
-  const menuDessertQties = document.querySelectorAll('.menu-dessert-qty');
-  const drinkSelectedStatus = document.getElementById('drink-selected-status');
-  const menuDrinkQties = document.querySelectorAll('.menu-drink-qty');
 
   if (!regCount || !regAdults || !regChildren) return;
 
@@ -669,35 +665,6 @@ function setupFormListeners() {
       }
     }
 
-    // Dessert
-    let dessertSum = 0;
-    menuDessertQties.forEach(input => {
-      dessertSum += parseInt(input.value) || 0;
-    });
-
-    if (dessertSelectedStatus) {
-      dessertSelectedStatus.textContent = `已選 ${dessertSum} / ${totalCount} 份`;
-      if (dessertSum !== totalCount) {
-        dessertSelectedStatus.style.color = '#ef4444';
-      } else {
-        dessertSelectedStatus.style.color = 'var(--emerald-dark)';
-      }
-    }
-
-    // Drink
-    let drinkSum = 0;
-    menuDrinkQties.forEach(input => {
-      drinkSum += parseInt(input.value) || 0;
-    });
-
-    if (drinkSelectedStatus) {
-      drinkSelectedStatus.textContent = `已選 ${drinkSum} / ${totalCount} 份`;
-      if (drinkSum !== totalCount) {
-        drinkSelectedStatus.style.color = '#ef4444';
-      } else {
-        drinkSelectedStatus.style.color = 'var(--emerald-dark)';
-      }
-    }
   }
 
   // Update total count based on adults + children
@@ -739,24 +706,6 @@ function setupFormListeners() {
 
   // Bind menu item changes
   menuItemQties.forEach(input => {
-    input.addEventListener('input', () => {
-      let val = parseInt(input.value) || 0;
-      if (val < 0) input.value = 0;
-      updateMenuStatus();
-    });
-  });
-
-  // Bind dessert item changes
-  menuDessertQties.forEach(input => {
-    input.addEventListener('input', () => {
-      let val = parseInt(input.value) || 0;
-      if (val < 0) input.value = 0;
-      updateMenuStatus();
-    });
-  });
-
-  // Bind drink item changes
-  menuDrinkQties.forEach(input => {
     input.addEventListener('input', () => {
       let val = parseInt(input.value) || 0;
       if (val < 0) input.value = 0;
@@ -809,55 +758,12 @@ async function handleRegisterSubmit() {
     return;
   }
 
-  // 4. Gather Dessert Qty
-  const menuDessertQties = document.querySelectorAll('.menu-dessert-qty');
-  let dessertSum = 0;
-  const dessertOrders = {};
-  menuDessertQties.forEach(input => {
-    const qty = parseInt(input.value) || 0;
-    const dish = input.dataset.dish;
-    dessertOrders[dish] = qty;
-    dessertSum += qty;
-  });
-
-  // 5. Gather Drink Qty
-  const menuDrinkQties = document.querySelectorAll('.menu-drink-qty');
-  let drinkSum = 0;
-  const drinkOrders = {};
-  menuDrinkQties.forEach(input => {
-    const qty = parseInt(input.value) || 0;
-    const dish = input.dataset.dish;
-    drinkOrders[dish] = qty;
-    drinkSum += qty;
-  });
-
-  // 6. Check consistency of Dessert and Drink sums against Main Course sum, and only warn if there are children
-  if (dessertSum !== selectedSum || drinkSum !== selectedSum) {
-    if (children > 0 && !hasWarnedMismatch) {
-      hasWarnedMismatch = true;
-      const wantToFix = confirm("⚠️ 您的甜點或飲品點餐數量與主餐數量（報名總人數）不一致。\n\n請問您需要補點嗎？\n- 點擊【確定】（要補點）：返回修改點餐數量\n- 點擊【取消】（不需要）：直接送出報名並進入下一步");
-      if (wantToFix) {
-        return; // Return to form for adjustment
-      }
-    }
-  }
-
   showRegStatus('info', '⏳ 正在提交報名資料，請稍候...');
   const submitBtn = document.getElementById('reg-submit');
   submitBtn.disabled = true;
 
   // Format orders text for display/email
   const ordersListText = Object.entries(orders)
-    .filter(([_, qty]) => qty > 0)
-    .map(([dish, qty]) => `${dish}: ${qty}份`)
-    .join(', ');
-
-  const dessertsListText = Object.entries(dessertOrders)
-    .filter(([_, qty]) => qty > 0)
-    .map(([dish, qty]) => `${dish}: ${qty}份`)
-    .join(', ');
-
-  const drinksListText = Object.entries(drinkOrders)
     .filter(([_, qty]) => qty > 0)
     .map(([dish, qty]) => `${dish}: ${qty}份`)
     .join(', ');
@@ -875,21 +781,19 @@ async function handleRegisterSubmit() {
         children: children,
         childChair: childChair,
         orders: orders,
-        desserts: dessertOrders,
-        drinks: drinkOrders,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
       });
       dbSuccess = true;
       dbMsg = '已上傳至雲端 Firebase';
     } catch (error) {
       console.error("Firestore submit error:", error);
-      saveToLocalFallbackData(name, count, adults, children, childChair, orders, dessertOrders, drinkOrders);
+      saveToLocalFallbackData(name, count, adults, children, childChair, orders);
       dbSuccess = false;
       dbMsg = `雲端儲存失敗 (${error.message})，已備份至瀏覽器`;
     }
   } else {
     // Local fallback when Firebase config is missing
-    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childChair, orders, dessertOrders, drinkOrders);
+    const savedLocal = saveToLocalFallbackData(name, count, adults, children, childChair, orders);
     dbSuccess = savedLocal;
     dbMsg = savedLocal ? '已儲存至瀏覽器（本機預覽模式）' : '本機儲存失敗';
   }
@@ -912,8 +816,6 @@ async function handleRegisterSubmit() {
     }
 
     emailPayload["午餐點餐明細"] = ordersListText;
-    emailPayload["甜點點餐明細"] = dessertsListText;
-    emailPayload["飲品點餐明細"] = drinksListText;
     emailPayload["報名時間"] = new Date().toLocaleString('zh-TW');
 
     if (gasUrl) {
@@ -974,18 +876,6 @@ async function handleRegisterSubmit() {
       menuSelectedStatus.textContent = '已選 0 / 1 份';
       menuSelectedStatus.style.color = '#ef4444';
     }
-
-    const dessertSelectedStatus = document.getElementById('dessert-selected-status');
-    if (dessertSelectedStatus) {
-      dessertSelectedStatus.textContent = '已選 0 / 1 份';
-      dessertSelectedStatus.style.color = '#ef4444';
-    }
-
-    const drinkSelectedStatus = document.getElementById('drink-selected-status');
-    if (drinkSelectedStatus) {
-      drinkSelectedStatus.textContent = '已選 0 / 1 份';
-      drinkSelectedStatus.style.color = '#ef4444';
-    }
   } else {
     showRegStatus('error', `❌ 報名失敗：${dbMsg}。`);
   }
@@ -993,7 +883,7 @@ async function handleRegisterSubmit() {
 }
 
 // Fallback logic to save registration data in localStorage (with details)
-function saveToLocalFallbackData(name, count, adults, children, childChair, orders, desserts, drinks) {
+function saveToLocalFallbackData(name, count, adults, children, childChair, orders) {
   try {
     const localData = JSON.parse(localStorage.getItem('beitou_registrations') || '[]');
     localData.push({
@@ -1003,8 +893,6 @@ function saveToLocalFallbackData(name, count, adults, children, childChair, orde
       children: children,
       childChair: childChair,
       orders: orders,
-      desserts: desserts,
-      drinks: drinks,
       timestamp: new Date().toISOString()
     });
     localStorage.setItem('beitou_registrations', JSON.stringify(localData));
