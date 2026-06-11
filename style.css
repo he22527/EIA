@@ -1918,11 +1918,28 @@ footer {
     width: calc(100vw - 32px);
     right: 16px;
   }
+  
+  /* Modal Card Mobile Optimization */
+  .modal-card {
+    padding: 24px 20px;
+    max-width: 95%;
+  }
 }
 
 @media (max-width: 480px) {
   .guidelines-grid {
     grid-template-columns: 1fr;
+  }
+  .modal-card {
+    padding: 20px 14px;
+    max-width: 96%;
+  }
+  .modal-title {
+    font-size: 1.15rem;
+  }
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 8px;
   }
 }
 
