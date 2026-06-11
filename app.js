@@ -894,7 +894,7 @@ async function handleRegisterSubmit() {
   }
 
   if (dbSuccess) {
-    showRegStatus('success', `🎉 報名成功！${dbMsg}${emailMsg}。歡迎您，${name} (共 ${count} 人)！`);
+    showRegStatus('success', '🎉 報名成功！');
     regForm.reset();
     hasWarnedMismatch = false;
     
