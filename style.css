@@ -2063,9 +2063,35 @@ body.dark .modal-title {
   line-height: 1.5;
 }
 .reg-status-box.success {
-  background-color: var(--emerald-light);
-  color: var(--emerald-hover);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  background: var(--bg-card);
+  border: 2px solid var(--emerald);
+  padding: 32px 40px;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 280px;
+  max-width: 90%;
+  animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 .reg-status-box.error {
   background-color: var(--rose-light);

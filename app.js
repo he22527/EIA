@@ -627,7 +627,16 @@ function initFirebase() {
 }
 
 function showRegStatus(type, message) {
-  regStatus.textContent = message;
+  if (type === 'success') {
+    regStatus.textContent = '🎉 報名成功！';
+    regStatus.innerHTML = `
+      <div style="font-size: 2.2rem; margin-bottom: 12px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">🎉</div>
+      <div style="font-size: 1.45rem; font-weight: 800; color: var(--emerald-dark); margin-bottom: 20px;">報名成功！</div>
+      <button type="button" onclick="document.getElementById('reg-status').style.display='none'; document.getElementById('register-modal').classList.remove('active');" style="background: linear-gradient(135deg, var(--emerald) 0%, #10b981 100%); color: white; border: none; padding: 10px 28px; border-radius: 50px; font-size: 0.9rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); transition: all 0.2s ease;">OK</button>
+    `;
+  } else {
+    regStatus.textContent = message;
+  }
   regStatus.className = `reg-status-box ${type}`;
   regStatus.style.display = 'block';
 }
